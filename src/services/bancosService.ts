@@ -1,4 +1,4 @@
-import { supabase } from './supabaseClient';
+import { supabase, getCurrentUserId } from './supabaseClient';
 import { Banco } from '../types';
 
 export const bancosService = {
@@ -25,9 +25,18 @@ export const bancosService = {
   },
 
   async criar(banco: Omit<Banco, 'id_banco' | 'created_at' | 'updated_at'>): Promise<Banco> {
+    // Obter user_id do usuário autenticado para multi-tenancy
+    const userId = await getCurrentUserId();
+    
+    // Adicionar user_id ao banco (RLS garante que cada usuário veja apenas seus dados)
+    const bancoComUserId = {
+      ...banco,
+      user_id: userId,
+    };
+
     const { data, error } = await supabase
       .from('d_bancos')
-      .insert([banco])
+      .insert([bancoComUserId])
       .select()
       .single();
 

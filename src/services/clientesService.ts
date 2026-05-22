@@ -1,4 +1,4 @@
-import { supabase } from './supabaseClient';
+import { supabase, getCurrentUserId } from './supabaseClient';
 
 export const clientesService = {
   async listar() {
@@ -24,9 +24,12 @@ export const clientesService = {
   },
 
   async criar(dados: any) {
+    const userId = await getCurrentUserId();
+    const dadosComUserId = { ...dados, user_id: userId };
+    
     const { data, error } = await supabase
       .from('d_clientes')
-      .insert(dados)
+      .insert(dadosComUserId)
       .select()
       .single();
 

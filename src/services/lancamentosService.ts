@@ -1,4 +1,4 @@
-import { supabase } from './supabaseClient';
+import { supabase, getCurrentUserId } from './supabaseClient';
 import { Lancamento, CriarLancamentoDTO, FiltrosLancamento } from '../types';
 
 export const lancamentosService = {
@@ -54,9 +54,18 @@ export const lancamentosService = {
 
   // Criar lançamento
   async criar(lancamento: CriarLancamentoDTO): Promise<Lancamento> {
+    // Obter user_id do usuário autenticado para multi-tenancy
+    const userId = await getCurrentUserId();
+    
+    // Adicionar user_id ao lançamento (RLS garante que cada usuário veja apenas seus dados)
+    const lancamentoComUserId = {
+      ...lancamento,
+      user_id: userId,
+    };
+
     const { data, error } = await supabase
       .from('f_lancamentos')
-      .insert([lancamento])
+      .insert([lancamentoComUserId])
       .select()
       .single();
 

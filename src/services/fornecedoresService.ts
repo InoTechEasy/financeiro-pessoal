@@ -1,4 +1,4 @@
-import { supabase } from './supabaseClient';
+import { supabase, getCurrentUserId } from './supabaseClient';
 import { Fornecedor } from '../types';
 
 export const fornecedoresService = {
@@ -25,9 +25,12 @@ export const fornecedoresService = {
   },
 
   async criar(fornecedor: Omit<Fornecedor, 'id_fornecedor' | 'created_at' | 'updated_at'>): Promise<Fornecedor> {
+    const userId = await getCurrentUserId();
+    const fornecedorComUserId = { ...fornecedor, user_id: userId };
+    
     const { data, error } = await supabase
       .from('d_fornecedores')
-      .insert([fornecedor])
+      .insert([fornecedorComUserId])
       .select()
       .single();
 

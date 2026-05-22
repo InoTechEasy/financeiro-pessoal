@@ -1,4 +1,4 @@
-import { supabase } from './supabaseClient';
+import { supabase, getCurrentUserId } from './supabaseClient';
 import { CartaoCredito } from '../types';
 
 export const cartoesService = {
@@ -25,9 +25,12 @@ export const cartoesService = {
   },
 
   async criar(cartao: Omit<CartaoCredito, 'id_cartao_credito' | 'created_at' | 'updated_at'>): Promise<CartaoCredito> {
+    const userId = await getCurrentUserId();
+    const cartaoComUserId = { ...cartao, user_id: userId };
+    
     const { data, error } = await supabase
       .from('d_cartoes_credito')
-      .insert([cartao])
+      .insert([cartaoComUserId])
       .select()
       .single();
 

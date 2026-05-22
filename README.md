@@ -195,7 +195,52 @@ git branch -M main
 git push -u origin main
 ```
 
-## 🔐 Segurança
+## 🔐 Segurança e Multi-Tenancy
+
+O aplicativo implementa **Row Level Security (RLS)** do Supabase para garantir isolamento completo de dados entre usuários (multi-tenancy).
+
+### Como funciona o Multi-Tenancy
+
+**1. Isolamento de Dados:**
+- Cada usuário tem seus próprios dados isolados por `user_id`
+- O RLS garante que cada usuário veja APENAS seus próprios dados
+- Não é possível acessar dados de outros usuários, mesmo com SQL direto
+
+**2. Tabelas com user_id (dados do usuário):**
+- `d_bancos` - bancos do usuário
+- `d_cartoes_credito` - cartões do usuário
+- `d_fornecedores` - fornecedores do usuário
+- `d_clientes` - clientes do usuário
+- `f_lancamentos` - lançamentos do usuário
+
+**3. Tabelas compartilhadas (dados de referência):**
+- `d_tipos_lancamentos` - tipos de lançamento (compartilhado)
+- `d_receitas` - receitas padrão (compartilhado)
+- `d_investimentos` - tipos de investimento (compartilhado)
+- `d_categorias_despesas` - categorias (compartilhado)
+- `d_documentos` - tipos de documento (compartilhado)
+- `d_tipos_pagamentos` - tipos de pagamento (compartilhado)
+
+**4. Políticas RLS:**
+- **SELECT**: usuário vê apenas onde `user_id = auth.uid()`
+- **INSERT**: usuário insere apenas com seu próprio `user_id`
+- **UPDATE**: usuário atualiza apenas seus próprios dados
+- **DELETE**: usuário deleta apenas seus próprios dados
+
+**5. Implementação no Frontend:**
+- A função `getCurrentUserId()` obtém o UID do usuário autenticado
+- Todos os inserts incluem automaticamente o `user_id` do usuário atual
+- O RLS garante segurança no nível do banco de dados
+
+### Como Aplicar as Migrações
+
+Para habilitar o multi-tenancy em um banco existente:
+
+1. Execute `database/migration_add_user_id.sql` no SQL Editor do Supabase
+2. Execute `database/rls-policies.sql` no SQL Editor do Supabase
+3. O sistema agora está configurado para multi-tenancy seguro
+
+### Segurança Adicional
 
 - Nunca commitar o arquivo `.env.local`
 - Usar variáveis de ambiente para dados sensíveis
