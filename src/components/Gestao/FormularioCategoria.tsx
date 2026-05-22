@@ -1,0 +1,132 @@
+import React, { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { categoriasService } from '../../services/categoriasService';
+
+interface FormularioCategoriaProps {
+  onSuccess?: () => void;
+  editData?: any;
+}
+
+export const FormularioCategoria: React.FC<FormularioCategoriaProps> = ({ onSuccess, editData }) => {
+  const [categorias, setCategorias] = useState<any[]>([]);
+  const [ordemSugerida, setOrdemSugerida] = useState<number>(1);
+
+  const { register, handleSubmit, reset, formState: { errors }, setValue } = useForm({
+    defaultValues: editData || {},
+  });
+
+  useEffect(() => {
+    const carregarCategorias = async () => {
+      try {
+        const data = await categoriasService.listar();
+        setCategorias(data);
+
+        // Se tem id_pai (subcategoria), calcular ordem sugerida e preencher select
+        if (editData?.id_pai) {
+          const subcategorias = data.filter(c => c.id_pai === editData.id_pai);
+          const maxOrdem = subcategorias.length > 0 ? Math.max(...subcategorias.map(c => c.ordem || 0)) : 0;
+          setOrdemSugerida(maxOrdem + 1);
+          setValue('ordem', maxOrdem + 1);
+          setValue('id_pai', editData.id_pai);
+        }
+      } catch (error) {
+        console.error('Erro ao carregar categorias:', error);
+      }
+    };
+    carregarCategorias();
+  }, [editData, setValue]);
+
+  const onSubmit = async (data: any) => {
+    try {
+      // Verifica se é edição (tem id_categoria_despesa) ou criação nova
+      if (editData?.id_categoria_despesa) {
+        await categoriasService.atualizar(editData.id_categoria_despesa, data);
+        alert('Categoria atualizada com sucesso!');
+      } else {
+        await categoriasService.criar(data);
+        alert('Categoria criada com sucesso!');
+        reset();
+      }
+      onSuccess?.();
+    } catch (error) {
+      alert('Erro ao salvar categoria');
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Nome *</label>
+        <input
+          {...register('nome', { required: 'Nome é obrigatório' })}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md"
+          placeholder="Nome da categoria"
+        />
+        {errors.nome && <span className="text-red-500 text-sm">{String(errors.nome.message)}</span>}
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Categoria Pai</label>
+        <select
+          {...register('id_pai')}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md"
+        >
+          <option value="">Nenhuma (Categoria Principal)</option>
+          {categorias.filter(c => !c.id_pai).map((categoria) => (
+            <option key={categoria.id_categoria_despesa} value={categoria.id_categoria_despesa}>
+              {categoria.nome}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
+        <textarea
+          {...register('descricao')}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md"
+          rows={3}
+          placeholder="Descrição da categoria"
+        />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Ícone</label>
+          <input
+            {...register('icone')}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+            placeholder="🍔"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Cor (Hex)</label>
+          <input
+            {...register('cor_hex')}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+            placeholder="#FF6B6B"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Ordem {editData?.id_pai && `(Sugerida: ${ordemSugerida})`}</label>
+          <input
+            type="number"
+            {...register('ordem', { valueAsNumber: true })}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+            placeholder={editData?.id_pai ? String(ordemSugerida) : "1"}
+            defaultValue={editData?.id_pai ? ordemSugerida : undefined}
+          />
+        </div>
+      </div>
+
+      <button
+        type="submit"
+        className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition"
+      >
+        {editData?.id_categoria_despesa ? 'Atualizar' : 'Salvar'}
+      </button>
+    </form>
+  );
+};

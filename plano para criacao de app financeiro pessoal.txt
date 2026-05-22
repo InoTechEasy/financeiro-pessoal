@@ -1,0 +1,1306 @@
+# 🚀 PROMPT PARA WINDSURF - App Financeiro Pessoal
+
+## INSTRUÇÕES GERAIS
+
+Você é um especialista em desenvolvimento full-stack. Crie um aplicativo web financeiro pessoal completo usando React + TypeScript + Supabase + Tailwind CSS. O app será deployado no Render e versionado no GitHub.
+
+---
+
+## 1. CONFIGURAÇÃO INICIAL DO PROJETO
+
+### 1.1 Setup do Projeto
+- Criar projeto React com Vite
+- Usar TypeScript para type safety
+- Instalar Tailwind CSS para styling
+- Instalar @supabase/supabase-js para integração com banco
+- Instalar react-router-dom para navegação
+- Instalar recharts para gráficos
+- Instalar date-fns para manipulação de datas
+- Instalar react-hook-form para formulários
+- Instalar zod para validação de schemas
+
+### 1.2 Estrutura de Pastas
+```
+src/
+├── components/
+│   ├── Dashboard.tsx
+│   ├── Lancamentos/
+│   │   ├── ListaLancamentos.tsx
+│   │   ├── FormularioLancamento.tsx
+│   │   ├── FiltrosLancamentos.tsx
+│   │   └── ModalLancamento.tsx
+│   ├── Gestao/
+│   │   ├── GerenciadorReceitas.tsx
+│   │   ├── GerenciadorInvestimentos.tsx
+│   │   ├── GerenciadorCategoriasDespesas.tsx
+│   │   ├── GerenciadorBancos.tsx
+│   │   ├── GerenciadorCartoes.tsx
+│   │   ├── GerenciadorFornecedores.tsx
+│   │   └── GerenciadorDocumentos.tsx
+│   ├── Comum/
+│   │   ├── Header.tsx
+│   │   ├── Sidebar.tsx
+│   │   ├── Footer.tsx
+│   │   ├── Loading.tsx
+│   │   └── ErrorBoundary.tsx
+│   └── Auth/
+│       ├── Login.tsx
+│       └── Register.tsx
+├── pages/
+│   ├── Financeiro.tsx
+│   ├── Gestao.tsx
+│   ├── Login.tsx
+│   └── NotFound.tsx
+├── services/
+│   ├── supabaseClient.ts
+│   ├── lancamentosService.ts
+│   ├── receitasService.ts
+│   ├── investimentosService.ts
+│   ├── categoriasService.ts
+│   ├── bancosService.ts
+│   ├── cartoesService.ts
+│   ├── fornecedoresService.ts
+│   └── documentosService.ts
+├── hooks/
+│   ├── useAuth.ts
+│   ├── useLancamentos.ts
+│   ├── useReceitas.ts
+│   ├── useInvestimentos.ts
+│   ├── useCategorias.ts
+│   ├── useBancos.ts
+│   └── useFormData.ts
+├── types/
+│   └── index.ts
+├── utils/
+│   ├── formatters.ts
+│   ├── validators.ts
+│   └── helpers.ts
+├── styles/
+│   └── globals.css
+├── App.tsx
+├── main.tsx
+└── vite-env.d.ts
+```
+
+### 1.3 Variáveis de Ambiente (.env.local)
+```
+VITE_SUPABASE_URL=https://[seu-projeto].supabase.co
+VITE_SUPABASE_ANON_KEY=eyJhbGc...
+```
+
+---
+
+## 2. BANCO DE DADOS - SCHEMA SQL
+
+Execute este script SQL no Supabase SQL Editor:
+
+```sql
+-- ============================================
+-- TABELAS DIMENSÃO
+-- ============================================
+
+-- dTipos_Lancamentos
+CREATE TABLE public.d_tipos_lancamentos (
+  id_tipo_lancamento UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  nome VARCHAR(50) NOT NULL UNIQUE,
+  descricao TEXT,
+  ativo BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- dReceitas
+CREATE TABLE public.d_receitas (
+  id_receita UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  id_pai UUID REFERENCES public.d_receitas(id_receita) ON DELETE CASCADE,
+  nome VARCHAR(100) NOT NULL,
+  descricao TEXT,
+  icone VARCHAR(50),
+  cor_hex VARCHAR(7),
+  ordem INTEGER,
+  ativo BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMP DEFAULT NOW(),
+  UNIQUE(id_pai, nome)
+);
+
+-- dInvestimentos
+CREATE TABLE public.d_investimentos (
+  id_investimento UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  id_pai UUID REFERENCES public.d_investimentos(id_investimento) ON DELETE CASCADE,
+  nome VARCHAR(100) NOT NULL,
+  descricao TEXT,
+  icone VARCHAR(50),
+  cor_hex VARCHAR(7),
+  ordem INTEGER,
+  ativo BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMP DEFAULT NOW(),
+  UNIQUE(id_pai, nome)
+);
+
+-- dCategorias_Despesas
+CREATE TABLE public.d_categorias_despesas (
+  id_categoria_despesa UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  id_pai UUID REFERENCES public.d_categorias_despesas(id_categoria_despesa) ON DELETE CASCADE,
+  nome VARCHAR(100) NOT NULL,
+  descricao TEXT,
+  icone VARCHAR(50),
+  cor_hex VARCHAR(7),
+  ordem INTEGER,
+  ativo BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMP DEFAULT NOW(),
+  UNIQUE(id_pai, nome)
+);
+
+-- dDocumentos
+CREATE TABLE public.d_documentos (
+  id_documento UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  id_pai UUID REFERENCES public.d_documentos(id_documento) ON DELETE CASCADE,
+  nome VARCHAR(100) NOT NULL,
+  descricao TEXT,
+  icone VARCHAR(50),
+  ordem INTEGER,
+  ativo BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMP DEFAULT NOW(),
+  UNIQUE(id_pai, nome)
+);
+
+-- dTipos_Pagamentos
+CREATE TABLE public.d_tipos_pagamentos (
+  id_tipo_pagamento UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  nome VARCHAR(100) NOT NULL UNIQUE,
+  descricao TEXT,
+  ativo BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- dBancos
+CREATE TABLE public.d_bancos (
+  id_banco UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  nome VARCHAR(100) NOT NULL,
+  codigo_banco VARCHAR(10),
+  tipo_conta VARCHAR(50),
+  numero_conta VARCHAR(20),
+  agencia VARCHAR(10),
+  saldo_inicial NUMERIC(15,2) DEFAULT 0,
+  ativo BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- dCartoes_Credito
+CREATE TABLE public.d_cartoes_credito (
+  id_cartao_credito UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  id_banco UUID NOT NULL REFERENCES public.d_bancos(id_banco) ON DELETE CASCADE,
+  nome VARCHAR(100) NOT NULL,
+  ultimos_digitos VARCHAR(4),
+  bandeira VARCHAR(50),
+  limite_credito NUMERIC(15,2),
+  data_vencimento_fatura INTEGER,
+  ativo BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- dFornecedores
+CREATE TABLE public.d_fornecedores (
+  id_fornecedor UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  nome VARCHAR(150) NOT NULL,
+  tipo VARCHAR(50),
+  cpf_cnpj VARCHAR(20),
+  email VARCHAR(100),
+  telefone VARCHAR(20),
+  endereco TEXT,
+  ativo BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- ============================================
+-- TABELA FATO
+-- ============================================
+
+CREATE TABLE public.f_lancamentos (
+  id_lancamento UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  id_tipo_lancamento UUID NOT NULL REFERENCES public.d_tipos_lancamentos(id_tipo_lancamento),
+  id_receita UUID REFERENCES public.d_receitas(id_receita),
+  id_categoria_despesa UUID REFERENCES public.d_categorias_despesas(id_categoria_despesa),
+  id_investimento UUID REFERENCES public.d_investimentos(id_investimento),
+  data_documento DATE,
+  id_documento UUID REFERENCES public.d_documentos(id_documento),
+  n_documento TEXT,
+  id_fornecedor UUID REFERENCES public.d_fornecedores(id_fornecedor),
+  descricao TEXT NOT NULL,
+  id_tipo_pagamento UUID NOT NULL REFERENCES public.d_tipos_pagamentos(id_tipo_pagamento),
+  id_cartao_credito UUID REFERENCES public.d_cartoes_credito(id_cartao_credito),
+  id_banco UUID NOT NULL REFERENCES public.d_bancos(id_banco),
+  valor_total NUMERIC(15,2) NOT NULL,
+  parcelas TEXT,
+  valor_parcela NUMERIC(15,2),
+  data_vencimento DATE,
+  data_pagamento DATE,
+  observacoes TEXT,
+  created_at TIMESTAMP DEFAULT NOW() AT TIME ZONE 'America/Sao_Paulo',
+  updated_at TIMESTAMP DEFAULT NOW() AT TIME ZONE 'America/Sao_Paulo'
+);
+
+-- ============================================
+-- ÍNDICES PARA PERFORMANCE
+-- ============================================
+
+CREATE INDEX idx_f_lancamentos_tipo ON public.f_lancamentos(id_tipo_lancamento);
+CREATE INDEX idx_f_lancamentos_categoria ON public.f_lancamentos(id_categoria_despesa);
+CREATE INDEX idx_f_lancamentos_receita ON public.f_lancamentos(id_receita);
+CREATE INDEX idx_f_lancamentos_investimento ON public.f_lancamentos(id_investimento);
+CREATE INDEX idx_f_lancamentos_data_documento ON public.f_lancamentos(data_documento);
+CREATE INDEX idx_f_lancamentos_data_pagamento ON public.f_lancamentos(data_pagamento);
+CREATE INDEX idx_f_lancamentos_data_vencimento ON public.f_lancamentos(data_vencimento);
+
+-- ============================================
+-- DADOS PADRÃO
+-- ============================================
+
+-- Tipos de Lançamentos
+INSERT INTO public.d_tipos_lancamentos (nome, descricao) VALUES
+('RECEITA', 'Entrada de dinheiro'),
+('DESPESA', 'Saída de dinheiro'),
+('INVESTIMENTO', 'Aplicação de capital');
+
+-- Tipos de Pagamentos
+INSERT INTO public.d_tipos_pagamentos (nome, descricao) VALUES
+('Cartão de Crédito', 'Pagamento via cartão de crédito'),
+('Fatura/Prazo', 'Pagamento a prazo'),
+('Débito/Crédito em Conta', 'Transferência ou débito em conta');
+
+-- Receitas (principais)
+INSERT INTO public.d_receitas (nome, descricao, icone, cor_hex, ordem) VALUES
+('Salário Pamela', 'Salário mensal de Pamela', '💰', '#00AA00', 1),
+('Salário Leonardo', 'Salário mensal de Leonardo', '💰', '#00BB00', 2),
+('Juros de Investimentos', 'Rendimentos de investimentos', '📈', '#0066FF', 3),
+('Bônus', 'Bônus e gratificações', '🎁', '#FF9900', 4),
+('Freelance', 'Trabalhos freelance', '💻', '#9933FF', 5),
+('Rendimentos', 'Rendimentos diversos', '💵', '#00CCCC', 6);
+
+-- Investimentos (principais)
+INSERT INTO public.d_investimentos (nome, descricao, icone, cor_hex, ordem) VALUES
+('CDB', 'Certificado de Depósito Bancário', '📊', '#FF6B6B', 1),
+('Tesouro Direto', 'Títulos do Tesouro Nacional', '🏛️', '#4ECDC4', 2),
+('Caixinha do Nubank', 'Caixinha de poupança Nubank', '🏦', '#95E1D3', 3),
+('Ações', 'Investimento em ações', '📈', '#FFE66D', 4),
+('Criptomoedas', 'Investimento em criptomoedas', '₿', '#FF8B94', 5),
+('Fundos', 'Fundos de investimento', '💼', '#FFB7B2', 6),
+('Renda Fixa', 'Investimentos em renda fixa', '📋', '#A8E6CF', 7);
+
+-- Categorias de Despesas (principais)
+INSERT INTO public.d_categorias_despesas (nome, descricao, icone, cor_hex, ordem) VALUES
+('Alimentação e Refeições', 'Despesas com alimentação', '🍔', '#FF6B6B', 1),
+('Viagens e Hospedagem', 'Viagens, passagens e hospedagem', '✈️', '#4ECDC4', 2),
+('Saúde e Bem-estar', 'Saúde, farmácia, academia', '💊', '#95E1D3', 3),
+('Educação', 'Cursos, livros, materiais', '📚', '#FFE66D', 4),
+('Transporte', 'Transporte e combustível', '🚗', '#95E1D3', 5),
+('Moradia', 'Aluguel, condomínio, utilidades', '🏠', '#C7CEEA', 6),
+('Entretenimento', 'Cinema, streaming, eventos', '🎬', '#FF8B94', 7),
+('Vestuário', 'Roupas, calçados, acessórios', '👕', '#FFB7B2', 8),
+('Higiene e Limpeza', 'Higiene pessoal e limpeza', '🧼', '#A8E6CF', 9),
+('Despesas Administrativas', 'Documentos, impostos', '📋', '#FFD3B6', 10),
+('Seguros', 'Seguros diversos', '🛡️', '#FFAAA5', 11),
+('Empréstimos e Dívidas', 'Juros, parcelas', '💳', '#FCBAD3', 12),
+('Doações e Caridade', 'Doações e contribuições', '❤️', '#A8D8EA', 13),
+('Serviços', 'Serviços diversos', '🔧', '#E0E0E0', 14),
+('Outros', 'Despesas diversas', '📌', '#CCCCCC', 15);
+
+-- Subcategorias para "Alimentação e Refeições"
+INSERT INTO public.d_categorias_despesas (id_pai, nome, icone, ordem) VALUES
+((SELECT id_categoria_despesa FROM public.d_categorias_despesas WHERE nome = 'Alimentação e Refeições' AND id_pai IS NULL), 'Mercado/Supermercado', '🛒', 1),
+((SELECT id_categoria_despesa FROM public.d_categorias_despesas WHERE nome = 'Alimentação e Refeições' AND id_pai IS NULL), 'Almoço', '🍽️', 2),
+((SELECT id_categoria_despesa FROM public.d_categorias_despesas WHERE nome = 'Alimentação e Refeições' AND id_pai IS NULL), 'Jantar', '🍴', 3),
+((SELECT id_categoria_despesa FROM public.d_categorias_despesas WHERE nome = 'Alimentação e Refeições' AND id_pai IS NULL), 'Café da Manhã', '☕', 4),
+((SELECT id_categoria_despesa FROM public.d_categorias_despesas WHERE nome = 'Alimentação e Refeições' AND id_pai IS NULL), 'Café da Tarde', '🥐', 5),
+((SELECT id_categoria_despesa FROM public.d_categorias_despesas WHERE nome = 'Alimentação e Refeições' AND id_pai IS NULL), 'Lanches/Snacks', '🍿', 6),
+((SELECT id_categoria_despesa FROM public.d_categorias_despesas WHERE nome = 'Alimentação e Refeições' AND id_pai IS NULL), 'Restaurante', '🍱', 7),
+((SELECT id_categoria_despesa FROM public.d_categorias_despesas WHERE nome = 'Alimentação e Refeições' AND id_pai IS NULL), 'Delivery', '🛵', 8);
+
+-- Tipos de Documentos (principais)
+INSERT INTO public.d_documentos (nome, descricao, icone, ordem) VALUES
+('Boleto', 'Boleto bancário', '📄', 1),
+('Fatura', 'Fatura de serviço', '📋', 2),
+('Nota Fiscal', 'Nota Fiscal (NF)', '🧾', 3),
+('Nota Fiscal de Serviço', 'Nota Fiscal de Serviço (NFS-e)', '📑', 4),
+('Recibo', 'Recibo de pagamento', '✅', 5),
+('Comprovante de Transferência', 'Comprovante de transferência bancária', '💳', 6),
+('Cupom Fiscal', 'Cupom fiscal', '🛍️', 7),
+('Outros', 'Outros tipos de documentos', '📌', 8);
+```
+
+---
+
+## 3. TIPOS E INTERFACES TYPESCRIPT
+
+Crie o arquivo `src/types/index.ts`:
+
+```typescript
+// Tipos de Lançamentos
+export type TipoLancamento = 'RECEITA' | 'DESPESA' | 'INVESTIMENTO';
+
+// Status do Lançamento (determinado pela lógica, não armazenado)
+export type StatusLancamento = 'PENDENTE' | 'PAGO' | 'PLANEJADO' | 'CANCELADO';
+
+// Interfaces para Dimensões
+export interface DimensaoBase {
+  created_at: string;
+  ativo: boolean;
+}
+
+export interface DimensaoHierarquica extends DimensaoBase {
+  id_pai: string | null;
+  nome: string;
+  descricao?: string;
+  icone?: string;
+  cor_hex?: string;
+  ordem?: number;
+}
+
+export interface TipoLancamentoDim extends DimensaoBase {
+  id_tipo_lancamento: string;
+  nome: TipoLancamento;
+  descricao?: string;
+}
+
+export interface Receita extends DimensaoHierarquica {
+  id_receita: string;
+}
+
+export interface Investimento extends DimensaoHierarquica {
+  id_investimento: string;
+}
+
+export interface CategoriaDespesa extends DimensaoHierarquica {
+  id_categoria_despesa: string;
+}
+
+export interface Documento extends DimensaoHierarquica {
+  id_documento: string;
+}
+
+export interface TipoPagamento extends DimensaoBase {
+  id_tipo_pagamento: string;
+  nome: string;
+  descricao?: string;
+}
+
+export interface Banco extends DimensaoBase {
+  id_banco: string;
+  nome: string;
+  codigo_banco?: string;
+  tipo_conta?: string;
+  numero_conta?: string;
+  agencia?: string;
+  saldo_inicial: number;
+  updated_at: string;
+}
+
+export interface CartaoCredito extends DimensaoBase {
+  id_cartao_credito: string;
+  id_banco: string;
+  nome: string;
+  ultimos_digitos?: string;
+  bandeira?: string;
+  limite_credito?: number;
+  data_vencimento_fatura?: number;
+  updated_at: string;
+}
+
+export interface Fornecedor extends DimensaoBase {
+  id_fornecedor: string;
+  nome: string;
+  tipo?: string;
+  cpf_cnpj?: string;
+  email?: string;
+  telefone?: string;
+  endereco?: string;
+  updated_at: string;
+}
+
+// Interface para Lançamento (Tabela Fato)
+export interface Lancamento {
+  id_lancamento: string;
+  id_tipo_lancamento: string;
+  id_receita?: string | null;
+  id_categoria_despesa?: string | null;
+  id_investimento?: string | null;
+  data_documento?: string | null;
+  id_documento?: string | null;
+  n_documento?: string | null;
+  id_fornecedor?: string | null;
+  descricao: string;
+  id_tipo_pagamento: string;
+  id_cartao_credito?: string | null;
+  id_banco: string;
+  valor_total: number;
+  parcelas?: string | null;
+  valor_parcela?: number | null;
+  data_vencimento?: string | null;
+  data_pagamento?: string | null;
+  observacoes?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+// Interface para Lançamento com dados relacionados (para exibição)
+export interface LancamentoComDetalhes extends Lancamento {
+  tipo_lancamento?: TipoLancamentoDim;
+  receita?: Receita;
+  categoria_despesa?: CategoriaDespesa;
+  investimento?: Investimento;
+  documento?: Documento;
+  tipo_pagamento?: TipoPagamento;
+  cartao_credito?: CartaoCredito;
+  banco?: Banco;
+  fornecedor?: Fornecedor;
+  status?: StatusLancamento;
+}
+
+// DTOs para Formulários
+export interface CriarLancamentoDTO {
+  id_tipo_lancamento: string;
+  id_receita?: string;
+  id_categoria_despesa?: string;
+  id_investimento?: string;
+  data_documento?: string;
+  id_documento?: string;
+  n_documento?: string;
+  id_fornecedor?: string;
+  descricao: string;
+  id_tipo_pagamento: string;
+  id_cartao_credito?: string;
+  id_banco: string;
+  valor_total: number;
+  parcelas?: string;
+  valor_parcela?: number;
+  data_vencimento?: string;
+  data_pagamento?: string;
+  observacoes?: string;
+}
+
+export interface AtualizarLancamentoDTO extends Partial<CriarLancamentoDTO> {
+  id_lancamento: string;
+}
+
+// Interface para Filtros
+export interface FiltrosLancamento {
+  data_inicio?: string;
+  data_fim?: string;
+  id_tipo_lancamento?: string;
+  id_categoria_despesa?: string;
+  id_receita?: string;
+  id_investimento?: string;
+  id_tipo_pagamento?: string;
+  id_banco?: string;
+  status?: StatusLancamento;
+  descricao?: string;
+}
+```
+
+---
+
+## 4. SERVIÇOS (Services)
+
+### 4.1 `src/services/supabaseClient.ts`
+
+```typescript
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error('Missing Supabase environment variables');
+}
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+```
+
+### 4.2 `src/services/lancamentosService.ts`
+
+```typescript
+import { supabase } from './supabaseClient';
+import { Lancamento, CriarLancamentoDTO, AtualizarLancamentoDTO, FiltrosLancamento } from '../types';
+
+export const lancamentosService = {
+  // Listar lançamentos com filtros
+  async listar(filtros?: FiltrosLancamento): Promise<Lancamento[]> {
+    let query = supabase.from('f_lancamentos').select('*');
+
+    if (filtros?.data_inicio) {
+      query = query.gte('data_documento', filtros.data_inicio);
+    }
+    if (filtros?.data_fim) {
+      query = query.lte('data_documento', filtros.data_fim);
+    }
+    if (filtros?.id_tipo_lancamento) {
+      query = query.eq('id_tipo_lancamento', filtros.id_tipo_lancamento);
+    }
+    if (filtros?.id_categoria_despesa) {
+      query = query.eq('id_categoria_despesa', filtros.id_categoria_despesa);
+    }
+    if (filtros?.id_receita) {
+      query = query.eq('id_receita', filtros.id_receita);
+    }
+    if (filtros?.id_investimento) {
+      query = query.eq('id_investimento', filtros.id_investimento);
+    }
+    if (filtros?.id_tipo_pagamento) {
+      query = query.eq('id_tipo_pagamento', filtros.id_tipo_pagamento);
+    }
+    if (filtros?.id_banco) {
+      query = query.eq('id_banco', filtros.id_banco);
+    }
+    if (filtros?.descricao) {
+      query = query.ilike('descricao', `%${filtros.descricao}%`);
+    }
+
+    const { data, error } = await query.order('data_documento', { ascending: false });
+
+    if (error) throw error;
+    return data || [];
+  },
+
+  // Obter lançamento por ID
+  async obterPorId(id: string): Promise<Lancamento | null> {
+    const { data, error } = await supabase
+      .from('f_lancamentos')
+      .select('*')
+      .eq('id_lancamento', id)
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  // Criar lançamento
+  async criar(lancamento: CriarLancamentoDTO): Promise<Lancamento> {
+    const { data, error } = await supabase
+      .from('f_lancamentos')
+      .insert([lancamento])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  // Atualizar lançamento
+  async atualizar(id: string, updates: Partial<CriarLancamentoDTO>): Promise<Lancamento> {
+    const { data, error } = await supabase
+      .from('f_lancamentos')
+      .update(updates)
+      .eq('id_lancamento', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  // Deletar lançamento
+  async deletar(id: string): Promise<void> {
+    const { error } = await supabase
+      .from('f_lancamentos')
+      .delete()
+      .eq('id_lancamento', id);
+
+    if (error) throw error;
+  },
+
+  // Obter resumo (receitas, despesas, investimentos)
+  async obterResumo(dataInicio?: string, dataFim?: string) {
+    let query = supabase
+      .from('f_lancamentos')
+      .select('id_tipo_lancamento, valor_total, data_pagamento');
+
+    if (dataInicio) {
+      query = query.gte('data_documento', dataInicio);
+    }
+    if (dataFim) {
+      query = query.lte('data_documento', dataFim);
+    }
+
+    const { data, error } = await query;
+
+    if (error) throw error;
+
+    const resumo = {
+      receitas: 0,
+      despesas: 0,
+      investimentos: 0,
+    };
+
+    data?.forEach((item: any) => {
+      if (item.data_pagamento) {
+        if (item.id_tipo_lancamento === 'RECEITA') {
+          resumo.receitas += item.valor_total;
+        } else if (item.id_tipo_lancamento === 'DESPESA') {
+          resumo.despesas += item.valor_total;
+        } else if (item.id_tipo_lancamento === 'INVESTIMENTO') {
+          resumo.investimentos += item.valor_total;
+        }
+      }
+    });
+
+    return resumo;
+  },
+};
+```
+
+### 4.3 `src/services/receitasService.ts`
+
+```typescript
+import { supabase } from './supabaseClient';
+import { Receita } from '../types';
+
+export const receitasService = {
+  async listar(): Promise<Receita[]> {
+    const { data, error } = await supabase
+      .from('d_receitas')
+      .select('*')
+      .eq('ativo', true)
+      .order('ordem', { ascending: true });
+
+    if (error) throw error;
+    return data || [];
+  },
+
+  async obterPorId(id: string): Promise<Receita | null> {
+    const { data, error } = await supabase
+      .from('d_receitas')
+      .select('*')
+      .eq('id_receita', id)
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  async criar(receita: Omit<Receita, 'id_receita' | 'created_at'>): Promise<Receita> {
+    const { data, error } = await supabase
+      .from('d_receitas')
+      .insert([receita])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  async atualizar(id: string, updates: Partial<Receita>): Promise<Receita> {
+    const { data, error } = await supabase
+      .from('d_receitas')
+      .update(updates)
+      .eq('id_receita', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  async deletar(id: string): Promise<void> {
+    const { error } = await supabase
+      .from('d_receitas')
+      .delete()
+      .eq('id_receita', id);
+
+    if (error) throw error;
+  },
+};
+```
+
+### 4.4 `src/services/investimentosService.ts`
+
+```typescript
+import { supabase } from './supabaseClient';
+import { Investimento } from '../types';
+
+export const investimentosService = {
+  async listar(): Promise<Investimento[]> {
+    const { data, error } = await supabase
+      .from('d_investimentos')
+      .select('*')
+      .eq('ativo', true)
+      .order('ordem', { ascending: true });
+
+    if (error) throw error;
+    return data || [];
+  },
+
+  async obterPorId(id: string): Promise<Investimento | null> {
+    const { data, error } = await supabase
+      .from('d_investimentos')
+      .select('*')
+      .eq('id_investimento', id)
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  async criar(investimento: Omit<Investimento, 'id_investimento' | 'created_at'>): Promise<Investimento> {
+    const { data, error } = await supabase
+      .from('d_investimentos')
+      .insert([investimento])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  async atualizar(id: string, updates: Partial<Investimento>): Promise<Investimento> {
+    const { data, error } = await supabase
+      .from('d_investimentos')
+      .update(updates)
+      .eq('id_investimento', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  async deletar(id: string): Promise<void> {
+    const { error } = await supabase
+      .from('d_investimentos')
+      .delete()
+      .eq('id_investimento', id);
+
+    if (error) throw error;
+  },
+};
+```
+
+### 4.5 `src/services/categoriasService.ts`
+
+```typescript
+import { supabase } from './supabaseClient';
+import { CategoriaDespesa } from '../types';
+
+export const categoriasService = {
+  async listar(): Promise<CategoriaDespesa[]> {
+    const { data, error } = await supabase
+      .from('d_categorias_despesas')
+      .select('*')
+      .eq('ativo', true)
+      .order('ordem', { ascending: true });
+
+    if (error) throw error;
+    return data || [];
+  },
+
+  async obterPorId(id: string): Promise<CategoriaDespesa | null> {
+    const { data, error } = await supabase
+      .from('d_categorias_despesas')
+      .select('*')
+      .eq('id_categoria_despesa', id)
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  async obterSubcategorias(idPai: string): Promise<CategoriaDespesa[]> {
+    const { data, error } = await supabase
+      .from('d_categorias_despesas')
+      .select('*')
+      .eq('id_pai', idPai)
+      .eq('ativo', true)
+      .order('ordem', { ascending: true });
+
+    if (error) throw error;
+    return data || [];
+  },
+
+  async criar(categoria: Omit<CategoriaDespesa, 'id_categoria_despesa' | 'created_at'>): Promise<CategoriaDespesa> {
+    const { data, error } = await supabase
+      .from('d_categorias_despesas')
+      .insert([categoria])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  async atualizar(id: string, updates: Partial<CategoriaDespesa>): Promise<CategoriaDespesa> {
+    const { data, error } = await supabase
+      .from('d_categorias_despesas')
+      .update(updates)
+      .eq('id_categoria_despesa', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  async deletar(id: string): Promise<void> {
+    const { error } = await supabase
+      .from('d_categorias_despesas')
+      .delete()
+      .eq('id_categoria_despesa', id);
+
+    if (error) throw error;
+  },
+};
+```
+
+### 4.6 `src/services/bancosService.ts`
+
+```typescript
+import { supabase } from './supabaseClient';
+import { Banco } from '../types';
+
+export const bancosService = {
+  async listar(): Promise<Banco[]> {
+    const { data, error } = await supabase
+      .from('d_bancos')
+      .select('*')
+      .eq('ativo', true)
+      .order('nome', { ascending: true });
+
+    if (error) throw error;
+    return data || [];
+  },
+
+  async obterPorId(id: string): Promise<Banco | null> {
+    const { data, error } = await supabase
+      .from('d_bancos')
+      .select('*')
+      .eq('id_banco', id)
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  async criar(banco: Omit<Banco, 'id_banco' | 'created_at' | 'updated_at'>): Promise<Banco> {
+    const { data, error } = await supabase
+      .from('d_bancos')
+      .insert([banco])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  async atualizar(id: string, updates: Partial<Banco>): Promise<Banco> {
+    const { data, error } = await supabase
+      .from('d_bancos')
+      .update({ ...updates, updated_at: new Date().toISOString() })
+      .eq('id_banco', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  async deletar(id: string): Promise<void> {
+    const { error } = await supabase
+      .from('d_bancos')
+      .update({ ativo: false })
+      .eq('id_banco', id);
+
+    if (error) throw error;
+  },
+};
+```
+
+### 4.7 `src/services/cartoesService.ts`
+
+```typescript
+import { supabase } from './supabaseClient';
+import { CartaoCredito } from '../types';
+
+export const cartoesService = {
+  async listar(): Promise<CartaoCredito[]> {
+    const { data, error } = await supabase
+      .from('d_cartoes_credito')
+      .select('*')
+      .eq('ativo', true)
+      .order('nome', { ascending: true });
+
+    if (error) throw error;
+    return data || [];
+  },
+
+  async obterPorId(id: string): Promise<CartaoCredito | null> {
+    const { data, error } = await supabase
+      .from('d_cartoes_credito')
+      .select('*')
+      .eq('id_cartao_credito', id)
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  async criar(cartao: Omit<CartaoCredito, 'id_cartao_credito' | 'created_at' | 'updated_at'>): Promise<CartaoCredito> {
+    const { data, error } = await supabase
+      .from('d_cartoes_credito')
+      .insert([cartao])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  async atualizar(id: string, updates: Partial<CartaoCredito>): Promise<CartaoCredito> {
+    const { data, error } = await supabase
+      .from('d_cartoes_credito')
+      .update({ ...updates, updated_at: new Date().toISOString() })
+      .eq('id_cartao_credito', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  async deletar(id: string): Promise<void> {
+    const { error } = await supabase
+      .from('d_cartoes_credito')
+      .update({ ativo: false })
+      .eq('id_cartao_credito', id);
+
+    if (error) throw error;
+  },
+};
+```
+
+### 4.8 `src/services/fornecedoresService.ts`
+
+```typescript
+import { supabase } from './supabaseClient';
+import { Fornecedor } from '../types';
+
+export const fornecedoresService = {
+  async listar(): Promise<Fornecedor[]> {
+    const { data, error } = await supabase
+      .from('d_fornecedores')
+      .select('*')
+      .eq('ativo', true)
+      .order('nome', { ascending: true });
+
+    if (error) throw error;
+    return data || [];
+  },
+
+  async obterPorId(id: string): Promise<Fornecedor | null> {
+    const { data, error } = await supabase
+      .from('d_fornecedores')
+      .select('*')
+      .eq('id_fornecedor', id)
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  async criar(fornecedor: Omit<Fornecedor, 'id_fornecedor' | 'created_at' | 'updated_at'>): Promise<Fornecedor> {
+    const { data, error } = await supabase
+      .from('d_fornecedores')
+      .insert([fornecedor])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  async atualizar(id: string, updates: Partial<Fornecedor>): Promise<Fornecedor> {
+    const { data, error } = await supabase
+      .from('d_fornecedores')
+      .update({ ...updates, updated_at: new Date().toISOString() })
+      .eq('id_fornecedor', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  async deletar(id: string): Promise<void> {
+    const { error } = await supabase
+      .from('d_fornecedores')
+      .update({ ativo: false })
+      .eq('id_fornecedor', id);
+
+    if (error) throw error;
+  },
+};
+```
+
+### 4.9 `src/services/documentosService.ts`
+
+```typescript
+import { supabase } from './supabaseClient';
+import { Documento } from '../types';
+
+export const documentosService = {
+  async listar(): Promise<Documento[]> {
+    const { data, error } = await supabase
+      .from('d_documentos')
+      .select('*')
+      .eq('ativo', true)
+      .order('ordem', { ascending: true });
+
+    if (error) throw error;
+    return data || [];
+  },
+
+  async obterPorId(id: string): Promise<Documento | null> {
+    const { data, error } = await supabase
+      .from('d_documentos')
+      .select('*')
+      .eq('id_documento', id)
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  async criar(documento: Omit<Documento, 'id_documento' | 'created_at'>): Promise<Documento> {
+    const { data, error } = await supabase
+      .from('d_documentos')
+      .insert([documento])
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  async atualizar(id: string, updates: Partial<Documento>): Promise<Documento> {
+    const { data, error } = await supabase
+      .from('d_documentos')
+      .update(updates)
+      .eq('id_documento', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  },
+
+  async deletar(id: string): Promise<void> {
+    const { error } = await supabase
+      .from('d_documentos')
+      .delete()
+      .eq('id_documento', id);
+
+    if (error) throw error;
+  },
+};
+```
+
+---
+
+## 5. HOOKS CUSTOMIZADOS
+
+### 5.1 `src/hooks/useAuth.ts`
+
+```typescript
+import { useState, useEffect } from 'react';
+import { supabase } from '../services/supabaseClient';
+
+export const useAuth = () => {
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+      setLoading(false);
+    };
+
+    getUser();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription?.unsubscribe();
+  }, []);
+
+  const logout = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+  };
+
+  return { user, loading, logout };
+};
+```
+
+### 5.2 `src/hooks/useLancamentos.ts`
+
+```typescript
+import { useState, useEffect } from 'react';
+import { lancamentosService } from '../services/lancamentosService';
+import { Lancamento, FiltrosLancamento } from '../types';
+
+export const useLancamentos = (filtros?: FiltrosLancamento) => {
+  const [lancamentos, setLancamentos] = useState<Lancamento[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const carregarLancamentos = async () => {
+      try {
+        setLoading(true);
+        const dados = await lancamentosService.listar(filtros);
+        setLancamentos(dados);
+        setError(null);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Erro ao carregar lançamentos');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    carregarLancamentos();
+  }, [filtros]);
+
+  const criar = async (lancamento: any) => {
+    try {
+      const novo = await lancamentosService.criar(lancamento);
+      setLancamentos([novo, ...lancamentos]);
+      return novo;
+    } catch (err) {
+      throw err;
+    }
+  };
+
+  const atualizar = async (id: string, updates: any) => {
+    try {
+      const atualizado = await lancamentosService.atualizar(id, updates);
+      setLancamentos(lancamentos.map(l => l.id_lancamento === id ? atualizado : l));
+      return atualizado;
+    } catch (err) {
+      throw err;
+    }
+  };
+
+  const deletar = async (id: string) => {
+    try {
+      await lancamentosService.deletar(id);
+      setLancamentos(lancamentos.filter(l => l.id_lancamento !== id));
+    } catch (err) {
+      throw err;
+    }
+  };
+
+  return { lancamentos, loading, error, criar, atualizar, deletar };
+};
+```
+
+---
+
+## 6. COMPONENTES PRINCIPAIS
+
+### 6.1 `src/components/Dashboard.tsx`
+
+Criar um dashboard com:
+- Cards mostrando resumo de receitas, despesas e investimentos do mês
+- Gráficos de tendência (últimos 12 meses)
+- Gráfico de pizza com distribuição de despesas por categoria
+- Últimos lançamentos
+
+### 6.2 `src/components/Lancamentos/FormularioLancamento.tsx`
+
+Criar formulário com:
+- Seleção de tipo de lançamento (RECEITA, DESPESA, INVESTIMENTO)
+- Campos dinâmicos baseados no tipo selecionado
+- Validação com Zod
+- Suporte a parcelamento
+- Data de documento, vencimento e pagamento
+
+### 6.3 `src/components/Lancamentos/ListaLancamentos.tsx`
+
+Criar lista com:
+- Tabela de lançamentos
+- Filtros por período, tipo, categoria
+- Busca por descrição
+- Ações (editar, deletar)
+- Paginação
+
+### 6.4 `src/components/Gestao/GerenciadorCategoriasDespesas.tsx`
+
+Criar gerenciador com:
+- CRUD de categorias (pai)
+- CRUD de subcategorias (filho)
+- Visualização hierárquica
+- Seleção de ícone e cor
+
+---
+
+## 7. PÁGINAS PRINCIPAIS
+
+### 7.1 `src/pages/Financeiro.tsx`
+
+Página com abas:
+- Dashboard
+- Lançamentos
+- Novo Lançamento
+
+### 7.2 `src/pages/Gestao.tsx`
+
+Página com abas:
+- Receitas
+- Investimentos
+- Categorias de Despesas
+- Bancos
+- Cartões de Crédito
+- Fornecedores
+- Tipos de Documentos
+
+---
+
+## 8. CONFIGURAÇÃO DO DEPLOY
+
+### 8.1 GitHub
+- Criar repositório público
+- Adicionar `.env.local` ao `.gitignore`
+- Fazer commit inicial com estrutura do projeto
+
+### 8.2 Render
+- Conectar repositório GitHub
+- Configurar variáveis de ambiente (VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY)
+- Build command: `npm run build`
+- Start command: `npm run preview`
+- Deploy automático em cada push para main
+
+---
+
+## 9. PRIORIDADES DE DESENVOLVIMENTO
+
+1. **Fase 1 (MVP)**: Autenticação, CRUD de lançamentos, Dashboard básico
+2. **Fase 2**: Categorias, Receitas, Investimentos, Filtros avançados
+3. **Fase 3**: Gráficos, Relatórios, Gestão de bancos e cartões
+4. **Fase 4**: Refinamentos, Temas, Exportação de dados
+
+---
+
+## 10. OBSERVAÇÕES IMPORTANTES
+
+- Use TypeScript em todos os arquivos
+- Implemente error handling adequado
+- Use Tailwind CSS para styling
+- Mantenha componentes pequenos e reutilizáveis
+- Siga a estrutura de pastas proposta
+- Adicione comentários explicativos onde necessário
+- Teste cada funcionalidade antes de passar para a próxima
+
+---
+
+**Fim do Prompt para Windsurf**

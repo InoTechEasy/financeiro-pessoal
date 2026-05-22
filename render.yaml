@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: financeiro-pessoal
+    env: static
+    buildCommand: npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_SUPABASE_URL
+        value: https://lbghddgwuiaskybajcyl.supabase.co
+      - key: VITE_SUPABASE_ANON_KEY
+        value: sb_publishable_KvmQ9HcoibUY7uTy_4ihBA_zN0r0qKc
