@@ -6,6 +6,6 @@ services:
     staticPublishPath: dist
     envVars:
       - key: VITE_SUPABASE_URL
-        value: https://lbghddgwuiaskybajcyl.supabase.co
+        sync: false
       - key: VITE_SUPABASE_ANON_KEY
-        value: sb_publishable_KvmQ9HcoibUY7uTy_4ihBA_zN0r0qKc
+        sync: false
