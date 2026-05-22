@@ -234,11 +234,13 @@ O aplicativo implementa **Row Level Security (RLS)** do Supabase para garantir i
 
 ### Como Aplicar as Migrações
 
-Para habilitar o multi-tenancy em um banco existente:
+Para habilitar o multi-tenancy em um banco existente com dados:
 
-1. Execute `database/migration_add_user_id.sql` no SQL Editor do Supabase
-2. Execute `database/rls-policies.sql` no SQL Editor do Supabase
-3. O sistema agora está configurado para multi-tenancy seguro
+1. Execute `database/migration_add_user_id.sql` no SQL Editor do Supabase (adiciona colunas user_id)
+2. Execute `database/migration_update_existing_data.sql` no SQL Editor do Supabase (atualiza dados existentes com user_id)
+3. Execute `database/rls-policies.sql` no SQL Editor do Supabase (ativa políticas RLS)
+
+**Importante:** Execute as migrações nesta ordem exata para não perder dados existentes.
 
 ### Segurança Adicional
 
