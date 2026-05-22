@@ -36,7 +36,11 @@ npm install
    - Project URL
    - anon public key
 3. Execute o script SQL em `database/schema.sql` no SQL Editor do Supabase
-4. Configure o Google OAuth em Authentication > Providers (opcional)
+4. Configure o Google OAuth em Authentication > Providers:
+   - Ative o provedor Google
+   - Adicione o Client ID e Client Secret do Google OAuth
+   - Configure a URL de redirecionamento autorizada (ex: https://seu-dominio.com/**)
+5. Para desenvolvimento local, adicione `http://localhost:3000/**` às URLs de redirecionamento
 
 ### 3. Configurar Variáveis de Ambiente
 

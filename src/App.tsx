@@ -9,6 +9,7 @@ import { useAuth } from './hooks/useAuth';
 import { Financeiro } from './pages/Financeiro';
 import { Gestao } from './pages/Gestao';
 import { Login } from './pages/Login';
+import { Register } from './components/Auth/Register';
 import { NotFound } from './pages/NotFound';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -31,6 +32,7 @@ const App: React.FC = () => {
       <Router>
         <Routes>
           <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
           <Route
             path="/*"
             element={
