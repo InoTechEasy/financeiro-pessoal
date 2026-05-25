@@ -23,7 +23,7 @@ export const BaixarPagamentos: React.FC = () => {
     carregarLancamentos();
   }, []);
 
-  const handleBaixarPagamento = async (id: string, dataPagamento: string) => {
+  const handleBaixarPagamento = async (id: number, dataPagamento: string) => {
     try {
       await lancamentosService.atualizar(id, { data_pagamento: dataPagamento });
       await carregarLancamentos();

@@ -9,7 +9,7 @@ export const ConciliacaoBancaria: React.FC = () => {
   const [bancos, setBancos] = useState<any[]>([]);
   const [tiposLancamentos, setTiposLancamentos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [bancoSelecionado, setBancoSelecionado] = useState<string>('');
+  const [bancoSelecionado, setBancoSelecionado] = useState<number | null>(null);
   const [dataInicio, setDataInicio] = useState<string>(new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0]);
   const [dataFim, setDataFim] = useState<string>(new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).toISOString().split('T')[0]);
   const [saldoInicial, setSaldoInicial] = useState<number>(0);
@@ -45,6 +45,7 @@ export const ConciliacaoBancaria: React.FC = () => {
 
   const carregarConciliacoes = async () => {
     try {
+      if (!bancoSelecionado) return;
       const dados = await conciliacaoBancariaService.listar({
         id_banco: bancoSelecionado,
       });
@@ -56,6 +57,7 @@ export const ConciliacaoBancaria: React.FC = () => {
 
   const carregarSaldoInicial = async () => {
     try {
+      if (!bancoSelecionado) return;
       const saldo = await conciliacaoBancariaService.obterSaldoInicial(bancoSelecionado, dataInicio);
       setSaldoInicial(saldo);
     } catch (error) {
@@ -65,6 +67,7 @@ export const ConciliacaoBancaria: React.FC = () => {
 
   const carregarTotais = async () => {
     try {
+      if (!bancoSelecionado) return;
       const totaisPeriodo = await conciliacaoBancariaService.calcularTotaisPeriodo(
         bancoSelecionado,
         dataInicio,
@@ -161,8 +164,8 @@ export const ConciliacaoBancaria: React.FC = () => {
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Banco</label>
           <select
-            value={bancoSelecionado}
-            onChange={(e) => setBancoSelecionado(e.target.value)}
+            value={bancoSelecionado || ''}
+            onChange={(e) => setBancoSelecionado(e.target.value ? parseInt(e.target.value) : null)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md"
           >
             <option value="">Selecione...</option>
