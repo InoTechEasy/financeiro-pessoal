@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useForm } from 'react-hook-form';
 import { fornecedoresService } from '../../services/fornecedoresService';
 
@@ -37,7 +37,7 @@ export const FormularioFornecedor: React.FC<FormularioFornecedorProps> = ({ onSu
           className="w-full px-3 py-2 border border-gray-300 rounded-md"
           placeholder="Nome do fornecedor"
         />
-        {errors.nome && <span className="text-red-500 text-sm">{errors.nome.message}</span>}
+        {errors.nome && <span className="text-red-500 text-sm">{String(errors.nome.message)}</span>}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

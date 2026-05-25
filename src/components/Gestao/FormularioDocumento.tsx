@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useForm } from 'react-hook-form';
 import { documentosService } from '../../services/documentosService';
 
@@ -37,7 +37,7 @@ export const FormularioDocumento: React.FC<FormularioDocumentoProps> = ({ onSucc
           className="w-full px-3 py-2 border border-gray-300 rounded-md"
           placeholder="Nome do documento"
         />
-        {errors.nome && <span className="text-red-500 text-sm">{errors.nome.message}</span>}
+        {errors.nome && <span className="text-red-500 text-sm">{String(errors.nome.message)}</span>}
       </div>
 
       <div>
@@ -50,25 +50,13 @@ export const FormularioDocumento: React.FC<FormularioDocumentoProps> = ({ onSucc
         />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Ícone</label>
-          <input
-            {...register('icone')}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md"
-            placeholder="📄"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Ordem</label>
-          <input
-            type="number"
-            {...register('ordem', { valueAsNumber: true })}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md"
-            placeholder="1"
-          />
-        </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Ícone</label>
+        <input
+          {...register('icone')}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md"
+          placeholder="📄"
+        />
       </div>
 
       <button

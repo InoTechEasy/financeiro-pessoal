@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useForm } from 'react-hook-form';
 import { tiposPagamentosService } from '../../services/tiposPagamentosService';
 
@@ -36,7 +36,7 @@ export const FormularioTipoPagamento: React.FC<FormularioTipoPagamentoProps> = (
           className="w-full px-3 py-2 border border-gray-300 rounded-md"
           placeholder="Nome do tipo de pagamento"
         />
-        {errors.nome && <span className="text-red-500 text-sm">{errors.nome.message}</span>}
+        {errors.nome && <span className="text-red-500 text-sm">{String(errors.nome.message)}</span>}
       </div>
 
       <div>
