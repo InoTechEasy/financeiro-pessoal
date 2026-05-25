@@ -3,7 +3,6 @@ import { Banco } from '../types';
 
 export const bancosService = {
   async listar(): Promise<Banco[]> {
-    // Obter user_id do usuário autenticado para multi-tenancy
     const userId = await getCurrentUserId();
     
     const { data, error } = await supabase
@@ -17,22 +16,23 @@ export const bancosService = {
     return data || [];
   },
 
-  async obterPorId(id: string): Promise<Banco | null> {
+  async obterPorId(id: number): Promise<Banco | null> {
+    const userId = await getCurrentUserId();
+    
     const { data, error } = await supabase
       .from('d_bancos')
       .select('*')
       .eq('id_banco', id)
+      .eq('user_id', userId)
       .single();
 
     if (error) throw error;
     return data;
   },
 
-  async criar(banco: Omit<Banco, 'id_banco' | 'created_at' | 'updated_at'>): Promise<Banco> {
-    // Obter user_id do usuário autenticado para multi-tenancy
+  async criar(banco: Omit<Banco, 'id_banco' | 'created_at'>): Promise<Banco> {
     const userId = await getCurrentUserId();
     
-    // Adicionar user_id ao banco (RLS garante que cada usuário veja apenas seus dados)
     const bancoComUserId = {
       ...banco,
       user_id: userId,
@@ -48,10 +48,10 @@ export const bancosService = {
     return data;
   },
 
-  async atualizar(id: string, updates: Partial<Banco>): Promise<Banco> {
+  async atualizar(id: number, updates: Partial<Banco>): Promise<Banco> {
     const { data, error } = await supabase
       .from('d_bancos')
-      .update({ ...updates, updated_at: new Date().toISOString() })
+      .update(updates)
       .eq('id_banco', id)
       .select()
       .single();
@@ -60,10 +60,10 @@ export const bancosService = {
     return data;
   },
 
-  async deletar(id: string): Promise<void> {
+  async deletar(id: number): Promise<void> {
     const { error } = await supabase
       .from('d_bancos')
-      .update({ ativo: false })
+      .delete()
       .eq('id_banco', id);
 
     if (error) throw error;

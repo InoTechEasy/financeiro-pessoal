@@ -10,10 +10,10 @@ export const lancamentosService = {
     let query = supabase.from('f_lancamentos').select('*').eq('user_id', userId);
 
     if (filtros?.data_inicio) {
-      query = query.gte('data_documento', filtros.data_inicio);
+      query = query.gte('data_vencimento', filtros.data_inicio);
     }
     if (filtros?.data_fim) {
-      query = query.lte('data_documento', filtros.data_fim);
+      query = query.lte('data_vencimento', filtros.data_fim);
     }
     if (filtros?.id_tipo_lancamento) {
       query = query.eq('id_tipo_lancamento', filtros.id_tipo_lancamento);
@@ -37,18 +37,21 @@ export const lancamentosService = {
       query = query.ilike('descricao', `%${filtros.descricao}%`);
     }
 
-    const { data, error } = await query.order('data_documento', { ascending: false });
+    const { data, error } = await query.order('data_vencimento', { ascending: false });
 
     if (error) throw error;
     return data || [];
   },
 
   // Obter lançamento por ID
-  async obterPorId(id: string): Promise<Lancamento | null> {
+  async obterPorId(id: number): Promise<Lancamento | null> {
+    const userId = await getCurrentUserId();
+    
     const { data, error } = await supabase
       .from('f_lancamentos')
       .select('*')
       .eq('id_lancamento', id)
+      .eq('user_id', userId)
       .single();
 
     if (error) throw error;
@@ -77,7 +80,7 @@ export const lancamentosService = {
   },
 
   // Atualizar lançamento
-  async atualizar(id: string, updates: Partial<CriarLancamentoDTO>): Promise<Lancamento> {
+  async atualizar(id: number, updates: Partial<CriarLancamentoDTO>): Promise<Lancamento> {
     const { data, error } = await supabase
       .from('f_lancamentos')
       .update(updates)
@@ -90,7 +93,7 @@ export const lancamentosService = {
   },
 
   // Deletar lançamento
-  async deletar(id: string): Promise<void> {
+  async deletar(id: number): Promise<void> {
     const { error } = await supabase
       .from('f_lancamentos')
       .delete()
@@ -101,16 +104,21 @@ export const lancamentosService = {
 
   // Obter resumo (receitas, despesas, investimentos)
   async obterResumo(dataInicio?: string, dataFim?: string, idsTiposLancamentos?: any, filtroData?: 'vencimento' | 'pagamento') {
+    const userId = await getCurrentUserId();
+    
     let query = supabase
       .from('f_lancamentos')
-      .select('id_tipo_lancamento, valor_total, data_pagamento, data_vencimento, eh_transferencia');
+      .select('id_tipo_lancamento, valor_total, data_pagamento, data_vencimento')
+      .eq('user_id', userId);
 
-    // Filtrar por período (usa data_documento como base)
+    // Filtrar por período
     if (dataInicio) {
-      query = query.gte('data_documento', dataInicio);
+      const campoData = filtroData === 'pagamento' ? 'data_pagamento' : 'data_vencimento';
+      query = query.gte(campoData, dataInicio);
     }
     if (dataFim) {
-      query = query.lte('data_documento', dataFim);
+      const campoData = filtroData === 'pagamento' ? 'data_pagamento' : 'data_vencimento';
+      query = query.lte(campoData, dataFim);
     }
 
     const { data, error } = await query;
@@ -124,20 +132,17 @@ export const lancamentosService = {
     };
 
     // Se não tiver os IDs dos tipos, buscar
-    let receitaId: string | undefined, despesaId: string | undefined, investimentoId: string | undefined, transferenciaId: string | undefined;
+    let receitaId: number | undefined, despesaId: number | undefined, investimentoId: number | undefined, transferenciaId: number | undefined;
     if (idsTiposLancamentos) {
-      receitaId = idsTiposLancamentos.find((t: any) => t.nome === 'RECEITA' || t.nome === 'Receita')?.id_tipo_lancamento;
-      despesaId = idsTiposLancamentos.find((t: any) => t.nome === 'DESPESA' || t.nome === 'Despesa')?.id_tipo_lancamento;
-      investimentoId = idsTiposLancamentos.find((t: any) => t.nome === 'INVESTIMENTO' || t.nome === 'Investimento')?.id_tipo_lancamento;
-      transferenciaId = idsTiposLancamentos.find((t: any) => t.nome === 'TRANSFERENCIA' || t.nome === 'Transferência' || t.nome === 'Transferência entre contas')?.id_tipo_lancamento;
+      receitaId = idsTiposLancamentos.find((t: any) => t.nome === 'Receita')?.id_tipo_lancamento;
+      despesaId = idsTiposLancamentos.find((t: any) => t.nome === 'Despesa')?.id_tipo_lancamento;
+      investimentoId = idsTiposLancamentos.find((t: any) => t.nome === 'Investimento')?.id_tipo_lancamento;
+      transferenciaId = idsTiposLancamentos.find((t: any) => t.nome === 'Transferência')?.id_tipo_lancamento;
     }
 
     data?.forEach((item: any) => {
-      // Não contar transferências no resumo (por tipo ou por campo eh_transferencia)
+      // Não contar transferências no resumo
       if (transferenciaId && item.id_tipo_lancamento === transferenciaId) {
-        return;
-      }
-      if (item.eh_transferencia) {
         return;
       }
       
