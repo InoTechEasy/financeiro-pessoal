@@ -1,14 +1,10 @@
-import { supabase, getCurrentUserId } from './supabaseClient';
+import { supabase } from './supabaseClient';
 
 export const tiposLancamentosService = {
   async listar() {
-    // Obter user_id do usuário autenticado para multi-tenancy
-    const userId = await getCurrentUserId();
-    
     const { data, error } = await supabase
       .from('d_tipos_lancamentos')
       .select('*')
-      .eq('user_id', userId)
       .eq('ativo', true)
       .order('nome');
 
@@ -28,12 +24,9 @@ export const tiposLancamentosService = {
   },
 
   async criar(dados: any) {
-    // Obter user_id do usuário autenticado para multi-tenancy
-    const userId = await getCurrentUserId();
-    
     const { data, error } = await supabase
       .from('d_tipos_lancamentos')
-      .insert({ ...dados, user_id: userId })
+      .insert(dados)
       .select()
       .single();
 
