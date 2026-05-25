@@ -1,5 +1,5 @@
 // Tipos de Lançamentos
-export type TipoLancamento = 'RECEITA' | 'DESPESA' | 'INVESTIMENTO';
+export type TipoLancamento = 'Receita' | 'Despesa' | 'Investimento' | 'Transferência';
 
 // Status do Lançamento (determinado pela lógica, não armazenado)
 export type StatusLancamento = 'PENDENTE' | 'PAGO' | 'PLANEJADO' | 'CANCELADO';
@@ -11,110 +11,100 @@ export interface DimensaoBase {
 }
 
 export interface DimensaoHierarquica extends DimensaoBase {
-  id_pai: string | null;
+  id_pai: number | null;
   nome: string;
   descricao?: string;
   icone?: string;
   cor_hex?: string;
-  ordem?: number;
 }
 
 export interface TipoLancamentoDim extends DimensaoBase {
-  id_tipo_lancamento: string;
+  id_tipo_lancamento: number;
   nome: TipoLancamento;
   descricao?: string;
 }
 
-export interface Receita extends DimensaoHierarquica {
-  id_receita: string;
+export interface Receita extends DimensaoBase {
+  id_receita: number;
 }
 
-export interface Investimento extends DimensaoHierarquica {
-  id_investimento: string;
+export interface Investimento extends DimensaoBase {
+  id_investimento: number;
 }
 
-export interface CategoriaDespesa extends DimensaoHierarquica {
-  id_categoria_despesa: string;
+export interface CategoriaDespesa extends DimensaoBase {
+  id_categoria_despesa: number;
 }
 
-export interface Documento extends DimensaoHierarquica {
-  id_documento: string;
+export interface Documento extends DimensaoBase {
+  id_documento: number;
 }
 
 export interface TipoPagamento extends DimensaoBase {
-  id_tipo_pagamento: string;
+  id_tipo_pagamento: number;
   nome: string;
   descricao?: string;
 }
 
 export interface Banco extends DimensaoBase {
-  id_banco: string;
+  id_banco: number;
+  user_id: string;
   nome: string;
-  codigo_banco?: string;
-  tipo_conta?: string;
-  numero_conta?: string;
   agencia?: string;
-  saldo_inicial: number;
-  updated_at: string;
+  conta?: string;
+  saldo_atual: number;
 }
 
 export interface CartaoCredito extends DimensaoBase {
-  id_cartao_credito: string;
-  id_banco: string;
+  id_cartao: number;
+  user_id: string;
   nome: string;
-  ultimos_digitos?: string;
-  bandeira?: string;
-  limite_credito?: number;
-  data_vencimento_fatura?: number;
-  updated_at: string;
+  numero?: string;
+  validade?: string;
+  limite: number;
+  dia_fechamento?: number;
+  dia_vencimento?: number;
 }
 
 export interface Fornecedor extends DimensaoBase {
-  id_fornecedor: string;
+  id_fornecedor: number;
+  user_id: string;
   nome: string;
-  tipo?: string;
-  cpf_cnpj?: string;
+  cnpj?: string;
   email?: string;
   telefone?: string;
-  endereco?: string;
-  updated_at: string;
 }
 
 export interface Cliente extends DimensaoBase {
-  id_cliente: string;
+  id_cliente: number;
+  user_id: string;
   nome: string;
-  tipo?: string;
-  cpf_cnpj?: string;
   email?: string;
   telefone?: string;
-  endereco?: string;
-  updated_at: string;
 }
 
 // Interface para Lançamento (Tabela Fato)
 export interface Lancamento {
-  id_lancamento: string;
-  id_tipo_lancamento: string;
-  id_receita?: string | null;
-  id_categoria_despesa?: string | null;
-  id_investimento?: string | null;
-  data_documento?: string | null;
-  id_documento?: string | null;
-  n_documento?: string | null;
-  id_fornecedor?: string | null;
-  id_cliente?: string | null;
+  id_lancamento: number;
+  user_id: string;
+  id_tipo_lancamento: number;
+  id_receita?: number | null;
+  id_categoria_despesa?: number | null;
+  id_investimento?: number | null;
+  id_banco?: number | null;
+  id_cartao?: number | null;
+  id_cliente?: number | null;
+  id_fornecedor?: number | null;
+  id_tipo_pagamento?: number | null;
   descricao: string;
-  id_tipo_pagamento: string;
-  id_cartao_credito?: string | null;
-  id_banco: string;
   valor_total: number;
-  parcelas?: string | null;
-  valor_parcela?: number | null;
+  valor_parcela?: number;
+  numero_parcelas?: number;
+  parcela_atual?: number;
   data_vencimento?: string | null;
   data_pagamento?: string | null;
   observacoes?: string | null;
   created_at: string;
-  updated_at: string;
 }
 
 // Interface para Lançamento com dados relacionados (para exibição)
@@ -134,41 +124,39 @@ export interface LancamentoComDetalhes extends Lancamento {
 
 // DTOs para Formulários
 export interface CriarLancamentoDTO {
-  id_tipo_lancamento: string;
-  id_receita?: string;
-  id_categoria_despesa?: string;
-  id_investimento?: string;
-  data_documento?: string;
-  id_documento?: string;
-  n_documento?: string;
-  id_fornecedor?: string;
-  id_cliente?: string;
+  id_tipo_lancamento: number;
+  id_receita?: number;
+  id_categoria_despesa?: number;
+  id_investimento?: number;
+  id_banco?: number;
+  id_cartao?: number;
+  id_cliente?: number;
+  id_fornecedor?: number;
+  id_tipo_pagamento?: number;
   descricao: string;
-  id_tipo_pagamento: string;
-  id_cartao_credito?: string;
-  id_banco: string;
   valor_total: number;
-  parcelas?: string;
   valor_parcela?: number;
+  numero_parcelas?: number;
+  parcela_atual?: number;
   data_vencimento?: string;
   data_pagamento?: string;
   observacoes?: string;
 }
 
 export interface AtualizarLancamentoDTO extends Partial<CriarLancamentoDTO> {
-  id_lancamento: string;
+  id_lancamento: number;
 }
 
 // Interface para Filtros
 export interface FiltrosLancamento {
   data_inicio?: string;
   data_fim?: string;
-  id_tipo_lancamento?: string;
-  id_categoria_despesa?: string;
-  id_receita?: string;
-  id_investimento?: string;
-  id_tipo_pagamento?: string;
-  id_banco?: string;
+  id_tipo_lancamento?: number;
+  id_categoria_despesa?: number;
+  id_receita?: number;
+  id_investimento?: number;
+  id_tipo_pagamento?: number;
+  id_banco?: number;
   status?: StatusLancamento;
   descricao?: string;
 }
