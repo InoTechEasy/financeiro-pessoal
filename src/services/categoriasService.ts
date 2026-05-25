@@ -7,13 +7,13 @@ export const categoriasService = {
       .from('d_categorias_despesas')
       .select('*')
       .eq('ativo', true)
-      .order('ordem', { ascending: true });
+      .order('nome');
 
     if (error) throw error;
     return data || [];
   },
 
-  async obterPorId(id: string): Promise<CategoriaDespesa | null> {
+  async obterPorId(id: number): Promise<CategoriaDespesa | null> {
     const { data, error } = await supabase
       .from('d_categorias_despesas')
       .select('*')
@@ -24,13 +24,13 @@ export const categoriasService = {
     return data;
   },
 
-  async obterSubcategorias(idPai: string): Promise<CategoriaDespesa[]> {
+  async obterSubcategorias(idPai: number): Promise<CategoriaDespesa[]> {
     const { data, error } = await supabase
       .from('d_categorias_despesas')
       .select('*')
       .eq('id_pai', idPai)
       .eq('ativo', true)
-      .order('ordem', { ascending: true });
+      .order('nome');
 
     if (error) throw error;
     return data || [];
@@ -47,7 +47,7 @@ export const categoriasService = {
     return data;
   },
 
-  async atualizar(id: string, updates: Partial<CategoriaDespesa>): Promise<CategoriaDespesa> {
+  async atualizar(id: number, updates: Partial<CategoriaDespesa>): Promise<CategoriaDespesa> {
     const { data, error } = await supabase
       .from('d_categorias_despesas')
       .update(updates)
@@ -59,7 +59,7 @@ export const categoriasService = {
     return data;
   },
 
-  async deletar(id: string): Promise<void> {
+  async deletar(id: number): Promise<void> {
     const { error } = await supabase
       .from('d_categorias_despesas')
       .delete()

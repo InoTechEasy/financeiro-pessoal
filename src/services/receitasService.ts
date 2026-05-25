@@ -7,13 +7,13 @@ export const receitasService = {
       .from('d_receitas')
       .select('*')
       .eq('ativo', true)
-      .order('ordem', { ascending: true });
+      .order('nome');
 
     if (error) throw error;
     return data || [];
   },
 
-  async obterPorId(id: string): Promise<Receita | null> {
+  async obterPorId(id: number): Promise<Receita | null> {
     const { data, error } = await supabase
       .from('d_receitas')
       .select('*')
@@ -35,7 +35,7 @@ export const receitasService = {
     return data;
   },
 
-  async atualizar(id: string, updates: Partial<Receita>): Promise<Receita> {
+  async atualizar(id: number, updates: Partial<Receita>): Promise<Receita> {
     const { data, error } = await supabase
       .from('d_receitas')
       .update(updates)
@@ -47,7 +47,7 @@ export const receitasService = {
     return data;
   },
 
-  async deletar(id: string): Promise<void> {
+  async deletar(id: number): Promise<void> {
     const { error } = await supabase
       .from('d_receitas')
       .delete()

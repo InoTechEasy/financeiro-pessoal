@@ -12,7 +12,7 @@ export const tiposLancamentosService = {
     return data || [];
   },
 
-  async obterPorId(id: string) {
+  async obterPorId(id: number) {
     const { data, error } = await supabase
       .from('d_tipos_lancamentos')
       .select('*')

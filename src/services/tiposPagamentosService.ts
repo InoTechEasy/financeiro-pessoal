@@ -11,7 +11,7 @@ export const tiposPagamentosService = {
     return data || [];
   },
 
-  async obterPorId(id: string) {
+  async obterPorId(id: number) {
     const { data, error } = await supabase
       .from('d_tipos_pagamentos')
       .select('*')
