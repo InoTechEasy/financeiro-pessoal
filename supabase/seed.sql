@@ -2,11 +2,11 @@
 -- Este script insere dados padrão que serão compartilhados entre todos os usuários
 
 -- Tipos de Lançamentos
-INSERT INTO d_tipos_lancamentos (id_tipo_lancamento, nome, descricao, ativo, ordem) VALUES
-('1', 'RECEITA', 'Entrada de dinheiro', true, 1),
-('2', 'DESPESA', 'Saída de dinheiro', true, 2),
-('3', 'INVESTIMENTO', 'Aplicação financeira', true, 3),
-('4', 'TRANSFERENCIA', 'Transferência entre contas', true, 4)
+INSERT INTO d_tipos_lancamentos (id_tipo_lancamento, nome, descricao, ativo) VALUES
+('1', 'RECEITA', 'Entrada de dinheiro', true),
+('2', 'DESPESA', 'Saída de dinheiro', true),
+('3', 'INVESTIMENTO', 'Aplicação financeira', true),
+('4', 'TRANSFERENCIA', 'Transferência entre contas', true)
 ON CONFLICT (id_tipo_lancamento) DO NOTHING;
 
 -- Tipos de Pagamentos
@@ -21,61 +21,61 @@ INSERT INTO d_tipos_pagamentos (id_tipo_pagamento, nome, descricao, ativo) VALUE
 ON CONFLICT (id_tipo_pagamento) DO NOTHING;
 
 -- Categorias de Despesas
-INSERT INTO d_categorias_despesas (id_categoria_despesa, nome, descricao, ativo, ordem, id_pai) VALUES
+INSERT INTO d_categorias_despesas (id_categoria_despesa, nome, descricao, ativo, id_pai) VALUES
 -- Categorias principais
-('1', 'Alimentação', 'Gastos com alimentação', true, 1, NULL),
-('2', 'Transporte', 'Gastos com transporte', true, 2, NULL),
-('3', 'Moradia', 'Gastos com moradia', true, 3, NULL),
-('4', 'Saúde', 'Gastos com saúde', true, 4, NULL),
-('5', 'Educação', 'Gastos com educação', true, 5, NULL),
-('6', 'Lazer', 'Gastos com lazer', true, 6, NULL),
-('7', 'Vestuário', 'Gastos com roupas e acessórios', true, 7, NULL),
-('8', 'Outros', 'Outros gastos não categorizados', true, 8, NULL),
+('1', 'Alimentação', 'Gastos com alimentação', true, NULL),
+('2', 'Transporte', 'Gastos com transporte', true, NULL),
+('3', 'Moradia', 'Gastos com moradia', true, NULL),
+('4', 'Saúde', 'Gastos com saúde', true, NULL),
+('5', 'Educação', 'Gastos com educação', true, NULL),
+('6', 'Lazer', 'Gastos com lazer', true, NULL),
+('7', 'Vestuário', 'Gastos com roupas e acessórios', true, NULL),
+('8', 'Outros', 'Outros gastos não categorizados', true, NULL),
 -- Subcategorias de Alimentação
-('9', 'Supermercado', 'Compras de supermercado', true, 1, '1'),
-('10', 'Restaurante', 'Refeições fora de casa', true, 2, '1'),
-('11', 'Lanches', 'Lanches rápidos', true, 3, '1'),
+('9', 'Supermercado', 'Compras de supermercado', true, '1'),
+('10', 'Restaurante', 'Refeições fora de casa', true, '1'),
+('11', 'Lanches', 'Lanches rápidos', true, '1'),
 -- Subcategorias de Transporte
-('12', 'Combustível', 'Abastecimento de veículos', true, 1, '2'),
-('13', 'Transporte Público', 'Passagens de ônibus, metrô, etc.', true, 2, '2'),
-('14', 'Manutenção Veículo', 'Manutenção e reparos de veículos', true, 3, '2'),
+('12', 'Combustível', 'Abastecimento de veículos', true, '2'),
+('13', 'Transporte Público', 'Passagens de ônibus, metrô, etc.', true, '2'),
+('14', 'Manutenção Veículo', 'Manutenção e reparos de veículos', true, '2'),
 -- Subcategorias de Moradia
-('15', 'Aluguel', 'Pagamento de aluguel', true, 1, '3'),
-('16', 'Água/Luz/Gás', 'Contas de utilities', true, 2, '3'),
-('17', 'Internet/Telefone', 'Contas de telecomunicações', true, 3, '3'),
-('18', 'Condomínio', 'Taxa de condomínio', true, 4, '3'),
+('15', 'Aluguel', 'Pagamento de aluguel', true, '3'),
+('16', 'Água/Luz/Gás', 'Contas de utilities', true, '3'),
+('17', 'Internet/Telefone', 'Contas de telecomunicações', true, '3'),
+('18', 'Condomínio', 'Taxa de condomínio', true, '3'),
 -- Subcategorias de Saúde
-('19', 'Farmácia', 'Medicamentos e produtos farmacêuticos', true, 1, '4'),
-('20', 'Consultas Médicas', 'Consultas com médicos e especialistas', true, 2, '4'),
-('21', 'Planos de Saúde', 'Mensalidade de planos de saúde', true, 3, '4'),
+('19', 'Farmácia', 'Medicamentos e produtos farmacêuticos', true, '4'),
+('20', 'Consultas Médicas', 'Consultas com médicos e especialistas', true, '4'),
+('21', 'Planos de Saúde', 'Mensalidade de planos de saúde', true, '4'),
 -- Subcategorias de Educação
-('22', 'Cursos', 'Cursos e treinamentos', true, 1, '5'),
-('23', 'Livros', 'Compra de livros e materiais', true, 2, '5'),
-('24', 'Mensalidade Escolar', 'Mensalidade de escolas e faculdades', true, 3, '5'),
+('22', 'Cursos', 'Cursos e treinamentos', true, '5'),
+('23', 'Livros', 'Compra de livros e materiais', true, '5'),
+('24', 'Mensalidade Escolar', 'Mensalidade de escolas e faculdades', true, '5'),
 -- Subcategorias de Lazer
-('25', 'Cinema/Teatro', 'Ingressos para shows, cinema, teatro', true, 1, '6'),
-('26', 'Viagens', 'Gastos com viagens', true, 2, '6'),
-('27', 'Hobbies', 'Gastos com hobbies pessoais', true, 3, '6')
+('25', 'Cinema/Teatro', 'Ingressos para shows, cinema, teatro', true, '6'),
+('26', 'Viagens', 'Gastos com viagens', true, '6'),
+('27', 'Hobbies', 'Gastos com hobbies pessoais', true, '6')
 ON CONFLICT (id_categoria_despesa) DO NOTHING;
 
 -- Receitas
-INSERT INTO d_receitas (id_receita, nome, descricao, ativo, ordem) VALUES
-('1', 'Salário', 'Renda mensal fixa', true, 1),
-('2', 'Freelance', 'Renda de trabalhos freelance', true, 2),
-('3', 'Comissões', 'Renda de comissões', true, 3),
-('4', 'Aluguel', 'Renda de aluguéis', true, 4),
-('5', 'Dividendos', 'Renda de investimentos', true, 5),
-('6', 'Outros', 'Outras fontes de renda', true, 6)
+INSERT INTO d_receitas (id_receita, nome, descricao, ativo) VALUES
+('1', 'Salário', 'Renda mensal fixa', true),
+('2', 'Freelance', 'Renda de trabalhos freelance', true),
+('3', 'Comissões', 'Renda de comissões', true),
+('4', 'Aluguel', 'Renda de aluguéis', true),
+('5', 'Dividendos', 'Renda de investimentos', true),
+('6', 'Outros', 'Outras fontes de renda', true)
 ON CONFLICT (id_receita) DO NOTHING;
 
 -- Investimentos
-INSERT INTO d_investimentos (id_investimento, nome, descricao, ativo, ordem) VALUES
-('1', 'Ações', 'Investimento em ações', true, 1),
-('2', 'CDB', 'Certificado de Depósito Bancário', true, 2),
-('3', 'LCI/LCA', 'Letras de Crédito Imobiliário/Agropecuário', true, 3),
-('4', 'Tesouro Direto', 'Títulos públicos', true, 4),
-('5', 'Fundos Imobiliários', 'Investimento em FIIs', true, 5),
-('6', 'Criptomoedas', 'Investimento em criptomoedas', true, 6),
-('7', 'Poupança', 'Poupança tradicional', true, 7),
-('8', 'Outros', 'Outros tipos de investimentos', true, 8)
+INSERT INTO d_investimentos (id_investimento, nome, descricao, ativo) VALUES
+('1', 'Ações', 'Investimento em ações', true),
+('2', 'CDB', 'Certificado de Depósito Bancário', true),
+('3', 'LCI/LCA', 'Letras de Crédito Imobiliário/Agropecuário', true),
+('4', 'Tesouro Direto', 'Títulos públicos', true),
+('5', 'Fundos Imobiliários', 'Investimento em FIIs', true),
+('6', 'Criptomoedas', 'Investimento em criptomoedas', true),
+('7', 'Poupança', 'Poupança tradicional', true),
+('8', 'Outros', 'Outros tipos de investimentos', true)
 ON CONFLICT (id_investimento) DO NOTHING;
