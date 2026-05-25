@@ -131,10 +131,14 @@ export const ListaLancamentos: React.FC = () => {
 
   const lancamentosOrdenados = ordenarLancamentos(lancamentosFiltrados);
   const totalPaginasCalculado = Math.ceil(lancamentosOrdenados.length / itensPorPagina);
-  setTotalPaginas(totalPaginasCalculado);
   const indiceInicio = (paginaAtual - 1) * itensPorPagina;
   const indiceFim = indiceInicio + itensPorPagina;
   const lancamentosPaginados = lancamentosOrdenados.slice(indiceInicio, indiceFim);
+
+  // Atualizar totalPaginas quando os filtros ou paginação mudarem
+  useEffect(() => {
+    setTotalPaginas(totalPaginasCalculado);
+  }, [totalPaginasCalculado]);
 
   const handleExportarPDF = () => {
     const doc = new jsPDF();
@@ -208,8 +212,8 @@ export const ListaLancamentos: React.FC = () => {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-4">
-        <div className="flex items-center space-x-4">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-4">
+        <div className="flex flex-wrap items-center gap-2">
           <select
             value={filtroBanco}
             onChange={(e) => setFiltroBanco(e.target.value)}
@@ -249,7 +253,7 @@ export const ListaLancamentos: React.FC = () => {
             placeholder="Filtrar por descrição..."
             value={filtroTexto}
             onChange={(e) => setFiltroTexto(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md text-sm w-64"
+            className="px-3 py-2 border border-gray-300 rounded-md text-sm w-full sm:w-64"
           />
         </div>
         <button
@@ -343,11 +347,11 @@ export const ListaLancamentos: React.FC = () => {
         </tbody>
       </table>
       {totalPaginas > 1 && (
-        <div className="flex items-center justify-between mt-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-4 gap-4">
           <div className="text-sm text-gray-500">
             Página {paginaAtual} de {totalPaginas}
           </div>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center justify-center space-x-2">
             <button
               onClick={() => setPaginaAtual(paginaAtual - 1)}
               disabled={paginaAtual === 1}

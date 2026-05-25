@@ -415,7 +415,7 @@ export const Dashboard: React.FC = () => {
       </div>
 
       {/* Filtros de Banco e Status */}
-      <div className="flex items-center space-x-4">
+      <div className="flex flex-wrap items-center gap-4">
         <span className="text-sm font-medium text-gray-700">Filtros adicionais:</span>
         <select
           value={filtroBanco}
@@ -442,7 +442,7 @@ export const Dashboard: React.FC = () => {
       </div>
 
       {/* Cards de Resumo */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         <div className="bg-white rounded-lg shadow-md p-6">
           <div className="flex items-center justify-between">
             <div>
@@ -487,10 +487,10 @@ export const Dashboard: React.FC = () => {
       </div>
 
       {/* Últimos Lançamentos */}
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <div className="flex items-center justify-between mb-4">
+      <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-4">
           <h3 className="text-lg font-semibold text-gray-900">Últimos Lançamentos</h3>
-          <div className="flex items-center space-x-2">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2">
             <select
               value={filtroTipoLancamento}
               onChange={(e) => setFiltroTipoLancamento(e.target.value)}
@@ -508,7 +508,7 @@ export const Dashboard: React.FC = () => {
               placeholder="Filtrar por descrição..."
               value={filtroTexto}
               onChange={(e) => setFiltroTexto(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-md text-sm w-64"
+              className="px-3 py-2 border border-gray-300 rounded-md text-sm w-full sm:w-64"
             />
           </div>
         </div>
@@ -606,11 +606,11 @@ export const Dashboard: React.FC = () => {
             </table>
           </div>
           {totalPaginas > 1 && (
-            <div className="flex items-center justify-between mt-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-4 gap-4">
               <div className="text-sm text-gray-500">
                 Página {paginaAtual} de {totalPaginas}
               </div>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center justify-center space-x-2">
                 <button
                   onClick={() => setPaginaAtual(paginaAtual - 1)}
                   disabled={paginaAtual === 1}
