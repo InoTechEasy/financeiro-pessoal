@@ -30,11 +30,9 @@ export const documentosService = {
   },
 
   async criar(documento: Omit<Documento, 'id_documento' | 'created_at'>): Promise<Documento> {
-    const userId = await getCurrentUserId();
-    
     const { data, error } = await supabase
       .from('d_documentos')
-      .insert([{ ...documento, user_id: userId }])
+      .insert([documento])
       .select()
       .single();
 

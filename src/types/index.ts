@@ -24,20 +24,27 @@ export interface TipoLancamentoDim extends DimensaoBase {
   descricao?: string;
 }
 
-export interface Receita extends DimensaoBase {
+export interface Receita extends DimensaoHierarquica {
   id_receita: number;
 }
 
-export interface Investimento extends DimensaoBase {
+export interface Investimento extends DimensaoHierarquica {
   id_investimento: number;
 }
 
-export interface CategoriaDespesa extends DimensaoBase {
+export interface CategoriaDespesa extends DimensaoHierarquica {
   id_categoria_despesa: number;
 }
 
-export interface Documento extends DimensaoBase {
+export interface Documento {
   id_documento: number;
+  user_id: string;
+  id_lancamento?: number | null;
+  nome_arquivo: string;
+  url_arquivo: string;
+  tipo_arquivo?: string;
+  tamanho_arquivo?: number;
+  created_at: string;
 }
 
 export interface TipoPagamento extends DimensaoBase {
@@ -50,37 +57,44 @@ export interface Banco extends DimensaoBase {
   id_banco: number;
   user_id: string;
   nome: string;
+  codigo_banco?: string;
+  tipo_conta?: string;
+  numero_conta?: string;
   agencia?: string;
-  conta?: string;
-  saldo_atual: number;
+  saldo_inicial?: number;
 }
 
 export interface CartaoCredito extends DimensaoBase {
   id_cartao: number;
   user_id: string;
+  id_banco: number;
   nome: string;
-  numero?: string;
-  validade?: string;
-  limite: number;
-  dia_fechamento?: number;
-  dia_vencimento?: number;
+  ultimos_digitos?: string;
+  bandeira?: string;
+  limite_credito?: number;
+  data_vencimento_fatura?: number;
 }
 
 export interface Fornecedor extends DimensaoBase {
   id_fornecedor: number;
   user_id: string;
   nome: string;
-  cnpj?: string;
+  tipo?: string;
+  cpf_cnpj?: string;
   email?: string;
   telefone?: string;
+  endereco?: string;
 }
 
 export interface Cliente extends DimensaoBase {
   id_cliente: number;
   user_id: string;
   nome: string;
+  tipo?: string;
+  cpf_cnpj?: string;
   email?: string;
   telefone?: string;
+  endereco?: string;
 }
 
 // Interface para Lançamento (Tabela Fato)
