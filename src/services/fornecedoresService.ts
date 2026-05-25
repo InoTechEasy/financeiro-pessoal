@@ -3,9 +3,13 @@ import { Fornecedor } from '../types';
 
 export const fornecedoresService = {
   async listar(): Promise<Fornecedor[]> {
+    // Obter user_id do usuário autenticado para multi-tenancy
+    const userId = await getCurrentUserId();
+    
     const { data, error } = await supabase
       .from('d_fornecedores')
       .select('*')
+      .eq('user_id', userId)
       .eq('ativo', true)
       .order('nome', { ascending: true });
 

@@ -1,10 +1,14 @@
-import { supabase } from './supabaseClient';
+import { supabase, getCurrentUserId } from './supabaseClient';
 
 export const tiposPagamentosService = {
   async listar() {
+    // Obter user_id do usuário autenticado para multi-tenancy
+    const userId = await getCurrentUserId();
+    
     const { data, error } = await supabase
       .from('d_tipos_pagamentos')
       .select('*')
+      .eq('user_id', userId)
       .order('nome');
 
     if (error) throw error;
@@ -23,9 +27,12 @@ export const tiposPagamentosService = {
   },
 
   async criar(dados: any) {
+    // Obter user_id do usuário autenticado para multi-tenancy
+    const userId = await getCurrentUserId();
+    
     const { data, error } = await supabase
       .from('d_tipos_pagamentos')
-      .insert(dados)
+      .insert({ ...dados, user_id: userId })
       .select()
       .single();
 

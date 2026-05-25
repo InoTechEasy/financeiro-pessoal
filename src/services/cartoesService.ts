@@ -3,9 +3,13 @@ import { CartaoCredito } from '../types';
 
 export const cartoesService = {
   async listar(): Promise<CartaoCredito[]> {
+    // Obter user_id do usuário autenticado para multi-tenancy
+    const userId = await getCurrentUserId();
+    
     const { data, error } = await supabase
       .from('d_cartoes_credito')
       .select('*')
+      .eq('user_id', userId)
       .eq('ativo', true)
       .order('nome', { ascending: true });
 

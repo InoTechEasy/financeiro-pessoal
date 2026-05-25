@@ -2,9 +2,13 @@ import { supabase, getCurrentUserId } from './supabaseClient';
 
 export const clientesService = {
   async listar() {
+    // Obter user_id do usuário autenticado para multi-tenancy
+    const userId = await getCurrentUserId();
+    
     const { data, error } = await supabase
       .from('d_clientes')
       .select('*')
+      .eq('user_id', userId)
       .eq('ativo', true)
       .order('nome');
 

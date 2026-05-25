@@ -1,11 +1,15 @@
-import { supabase } from './supabaseClient';
+import { supabase, getCurrentUserId } from './supabaseClient';
 import { Investimento } from '../types';
 
 export const investimentosService = {
   async listar(): Promise<Investimento[]> {
+    // Obter user_id do usuário autenticado para multi-tenancy
+    const userId = await getCurrentUserId();
+    
     const { data, error } = await supabase
       .from('d_investimentos')
       .select('*')
+      .eq('user_id', userId)
       .eq('ativo', true)
       .order('ordem', { ascending: true });
 
@@ -25,9 +29,12 @@ export const investimentosService = {
   },
 
   async criar(investimento: Omit<Investimento, 'id_investimento' | 'created_at'>): Promise<Investimento> {
+    // Obter user_id do usuário autenticado para multi-tenancy
+    const userId = await getCurrentUserId();
+    
     const { data, error } = await supabase
       .from('d_investimentos')
-      .insert([investimento])
+      .insert([{ ...investimento, user_id: userId }])
       .select()
       .single();
 

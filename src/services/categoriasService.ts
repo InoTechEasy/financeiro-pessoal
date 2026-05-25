@@ -1,11 +1,15 @@
-import { supabase } from './supabaseClient';
+import { supabase, getCurrentUserId } from './supabaseClient';
 import { CategoriaDespesa } from '../types';
 
 export const categoriasService = {
   async listar(): Promise<CategoriaDespesa[]> {
+    // Obter user_id do usuário autenticado para multi-tenancy
+    const userId = await getCurrentUserId();
+    
     const { data, error } = await supabase
       .from('d_categorias_despesas')
       .select('*')
+      .eq('user_id', userId)
       .eq('ativo', true)
       .order('ordem', { ascending: true });
 
@@ -37,9 +41,12 @@ export const categoriasService = {
   },
 
   async criar(categoria: Omit<CategoriaDespesa, 'id_categoria_despesa' | 'created_at'>): Promise<CategoriaDespesa> {
+    // Obter user_id do usuário autenticado para multi-tenancy
+    const userId = await getCurrentUserId();
+    
     const { data, error } = await supabase
       .from('d_categorias_despesas')
-      .insert([categoria])
+      .insert([{ ...categoria, user_id: userId }])
       .select()
       .single();
 

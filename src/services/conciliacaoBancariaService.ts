@@ -1,9 +1,12 @@
-import { supabase } from './supabaseClient';
+import { supabase, getCurrentUserId } from './supabaseClient';
 
 export const conciliacaoBancariaService = {
   // Listar conciliações
   async listar(filtros?: { id_banco?: string; data_inicio?: string; data_fim?: string }): Promise<any[]> {
-    let query = supabase.from('f_conciliacao_bancaria').select('*');
+    // Obter user_id do usuário autenticado para multi-tenancy
+    const userId = await getCurrentUserId();
+    
+    let query = supabase.from('f_conciliacao_bancaria').select('*').eq('user_id', userId);
 
     if (filtros?.id_banco) {
       query = query.eq('id_banco', filtros.id_banco);
@@ -35,9 +38,12 @@ export const conciliacaoBancariaService = {
 
   // Criar conciliação
   async criar(conciliacao: any): Promise<any> {
+    // Obter user_id do usuário autenticado para multi-tenancy
+    const userId = await getCurrentUserId();
+    
     const { data, error } = await supabase
       .from('f_conciliacao_bancaria')
-      .insert([conciliacao])
+      .insert([{ ...conciliacao, user_id: userId }])
       .select()
       .single();
 
@@ -70,10 +76,14 @@ export const conciliacaoBancariaService = {
 
   // Obter saldo inicial do período (saldo bancário final do período anterior)
   async obterSaldoInicial(idBanco: string, dataInicio: string): Promise<number> {
+    // Obter user_id do usuário autenticado para multi-tenancy
+    const userId = await getCurrentUserId();
+    
     // Buscar a última conciliação anterior à data início
     const { data, error } = await supabase
       .from('f_conciliacao_bancaria')
       .select('saldo_bancario_final')
+      .eq('user_id', userId)
       .eq('id_banco', idBanco)
       .lt('data_fim', dataInicio)
       .order('data_fim', { ascending: false })
@@ -85,6 +95,7 @@ export const conciliacaoBancariaService = {
       const { data: banco, error: bancoError } = await supabase
         .from('d_bancos')
         .select('saldo_inicial')
+        .eq('user_id', userId)
         .eq('id_banco', idBanco)
         .single();
 
@@ -97,6 +108,9 @@ export const conciliacaoBancariaService = {
 
   // Calcular totais do período (receitas, despesas, investimentos)
   async calcularTotaisPeriodo(idBanco: string, dataInicio: string, dataFim: string, idsTiposLancamentos?: any): Promise<any> {
+    // Obter user_id do usuário autenticado para multi-tenancy
+    const userId = await getCurrentUserId();
+    
     const receitaId = idsTiposLancamentos?.find((t: any) => t.nome === 'RECEITA' || t.nome === 'Receita')?.id_tipo_lancamento;
     const despesaId = idsTiposLancamentos?.find((t: any) => t.nome === 'DESPESA' || t.nome === 'Despesa')?.id_tipo_lancamento;
     const investimentoId = idsTiposLancamentos?.find((t: any) => t.nome === 'INVESTIMENTO' || t.nome === 'Investimento')?.id_tipo_lancamento;
@@ -105,6 +119,7 @@ export const conciliacaoBancariaService = {
     const { data, error } = await supabase
       .from('f_lancamentos')
       .select('id_tipo_lancamento, valor_total')
+      .eq('user_id', userId)
       .eq('id_banco', idBanco)
       .gte('data_vencimento', dataInicio)
       .lte('data_vencimento', dataFim);

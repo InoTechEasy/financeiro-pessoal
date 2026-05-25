@@ -3,9 +3,13 @@ import { Banco } from '../types';
 
 export const bancosService = {
   async listar(): Promise<Banco[]> {
+    // Obter user_id do usuário autenticado para multi-tenancy
+    const userId = await getCurrentUserId();
+    
     const { data, error } = await supabase
       .from('d_bancos')
       .select('*')
+      .eq('user_id', userId)
       .eq('ativo', true)
       .order('nome', { ascending: true });
 

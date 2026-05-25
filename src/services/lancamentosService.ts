@@ -4,7 +4,10 @@ import { Lancamento, CriarLancamentoDTO, FiltrosLancamento } from '../types';
 export const lancamentosService = {
   // Listar lançamentos com filtros
   async listar(filtros?: FiltrosLancamento): Promise<Lancamento[]> {
-    let query = supabase.from('f_lancamentos').select('*');
+    // Obter user_id do usuário autenticado para multi-tenancy
+    const userId = await getCurrentUserId();
+    
+    let query = supabase.from('f_lancamentos').select('*').eq('user_id', userId);
 
     if (filtros?.data_inicio) {
       query = query.gte('data_documento', filtros.data_inicio);
