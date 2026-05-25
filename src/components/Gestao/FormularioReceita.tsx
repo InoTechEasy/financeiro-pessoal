@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useForm } from 'react-hook-form';
 import { receitasService } from '../../services/receitasService';
 
@@ -8,23 +8,9 @@ interface FormularioReceitaProps {
 }
 
 export const FormularioReceita: React.FC<FormularioReceitaProps> = ({ onSuccess, editData }) => {
-  const [receitas, setReceitas] = useState<any[]>([]);
-
   const { register, handleSubmit, reset, formState: { errors } } = useForm({
     defaultValues: editData || {},
   });
-
-  useEffect(() => {
-    const carregarReceitas = async () => {
-      try {
-        const data = await receitasService.listar();
-        setReceitas(data);
-      } catch (error) {
-        console.error('Erro ao carregar receitas:', error);
-      }
-    };
-    carregarReceitas();
-  }, []);
 
   const onSubmit = async (data: any) => {
     try {
@@ -65,7 +51,7 @@ export const FormularioReceita: React.FC<FormularioReceitaProps> = ({ onSuccess,
         />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Ícone</label>
           <input
@@ -81,16 +67,6 @@ export const FormularioReceita: React.FC<FormularioReceitaProps> = ({ onSuccess,
             {...register('cor_hex')}
             className="w-full px-3 py-2 border border-gray-300 rounded-md"
             placeholder="#00AA00"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Ordem</label>
-          <input
-            type="number"
-            {...register('ordem', { valueAsNumber: true })}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md"
-            placeholder="1"
           />
         </div>
       </div>

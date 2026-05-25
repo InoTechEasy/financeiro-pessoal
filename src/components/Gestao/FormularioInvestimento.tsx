@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useForm } from 'react-hook-form';
 import { investimentosService } from '../../services/investimentosService';
 
@@ -8,23 +8,9 @@ interface FormularioInvestimentoProps {
 }
 
 export const FormularioInvestimento: React.FC<FormularioInvestimentoProps> = ({ onSuccess, editData }) => {
-  const [investimentos, setInvestimentos] = useState<any[]>([]);
-
   const { register, handleSubmit, reset, formState: { errors } } = useForm({
     defaultValues: editData || {},
   });
-
-  useEffect(() => {
-    const carregarInvestimentos = async () => {
-      try {
-        const data = await investimentosService.listar();
-        setInvestimentos(data);
-      } catch (error) {
-        console.error('Erro ao carregar investimentos:', error);
-      }
-    };
-    carregarInvestimentos();
-  }, []);
 
   const onSubmit = async (data: any) => {
     try {
@@ -65,7 +51,7 @@ export const FormularioInvestimento: React.FC<FormularioInvestimentoProps> = ({ 
         />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Ícone</label>
           <input
@@ -81,16 +67,6 @@ export const FormularioInvestimento: React.FC<FormularioInvestimentoProps> = ({ 
             {...register('cor_hex')}
             className="w-full px-3 py-2 border border-gray-300 rounded-md"
             placeholder="#FF6B6B"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Ordem</label>
-          <input
-            type="number"
-            {...register('ordem', { valueAsNumber: true })}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md"
-            placeholder="1"
           />
         </div>
       </div>
