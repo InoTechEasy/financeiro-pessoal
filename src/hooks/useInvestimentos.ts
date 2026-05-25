@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { investimentosService } from '../services/investimentosService';
 import { Investimento } from '../types';
 
-export const useInvestimentos = () => {
+export const useInvestimentos = (refreshKey?: number) => {
   const [investimentos, setInvestimentos] = useState<Investimento[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -22,7 +22,7 @@ export const useInvestimentos = () => {
     };
 
     carregarInvestimentos();
-  }, []);
+  }, [refreshKey]);
 
   const criar = async (investimento: any) => {
     try {

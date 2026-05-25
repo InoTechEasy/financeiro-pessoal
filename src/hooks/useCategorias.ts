@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { categoriasService } from '../services/categoriasService';
 import { CategoriaDespesa } from '../types';
 
-export const useCategorias = () => {
+export const useCategorias = (refreshKey?: number) => {
   const [categorias, setCategorias] = useState<CategoriaDespesa[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -22,7 +22,7 @@ export const useCategorias = () => {
     };
 
     carregarCategorias();
-  }, []);
+  }, [refreshKey]);
 
   const criar = async (categoria: any) => {
     try {

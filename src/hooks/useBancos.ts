@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { bancosService } from '../services/bancosService';
 import { Banco } from '../types';
 
-export const useBancos = () => {
+export const useBancos = (refreshKey?: number) => {
   const [bancos, setBancos] = useState<Banco[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -22,7 +22,7 @@ export const useBancos = () => {
     };
 
     carregarBancos();
-  }, []);
+  }, [refreshKey]);
 
   const criar = async (banco: any) => {
     try {

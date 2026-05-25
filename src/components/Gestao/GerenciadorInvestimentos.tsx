@@ -4,9 +4,10 @@ import { FormularioInvestimento } from './FormularioInvestimento';
 import { ModalLancamento } from '../Lancamentos/ModalLancamento';
 
 export const GerenciadorInvestimentos: React.FC = () => {
-  const { investimentos, loading, deletar } = useInvestimentos();
   const [showModal, setShowModal] = useState(false);
   const [editData, setEditData] = useState<any>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const { investimentos, loading, deletar } = useInvestimentos(refreshKey);
 
   const handleEdit = (investimento: any) => {
     setEditData(investimento);
@@ -16,12 +17,14 @@ export const GerenciadorInvestimentos: React.FC = () => {
   const handleDelete = async (id: string) => {
     if (confirm('Tem certeza que deseja excluir?')) {
       await deletar(id);
+      setRefreshKey(prev => prev + 1);
     }
   };
 
   const handleSuccess = () => {
     setShowModal(false);
     setEditData(null);
+    setRefreshKey(prev => prev + 1);
   };
 
   if (loading) {

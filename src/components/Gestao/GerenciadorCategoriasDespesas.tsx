@@ -4,9 +4,10 @@ import { FormularioCategoria } from './FormularioCategoria';
 import { ModalLancamento } from '../Lancamentos/ModalLancamento';
 
 export const GerenciadorCategoriasDespesas: React.FC = () => {
-  const { categorias, loading, deletar } = useCategorias();
   const [showModal, setShowModal] = useState(false);
   const [editData, setEditData] = useState<any>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const { categorias, loading, deletar } = useCategorias(refreshKey);
 
   const handleEdit = (categoria: any) => {
     setEditData(categoria);
@@ -27,6 +28,7 @@ export const GerenciadorCategoriasDespesas: React.FC = () => {
   const handleSuccess = () => {
     setShowModal(false);
     setEditData(null);
+    setRefreshKey(prev => prev + 1);
   };
 
   if (loading) {

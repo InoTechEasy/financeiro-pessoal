@@ -20,6 +20,53 @@ export const Dashboard: React.FC = () => {
   const [filtroBanco, setFiltroBanco] = useState<string>(''); // filtro por banco
   const [filtroStatus, setFiltroStatus] = useState<string>(''); // filtro por status
   const [filtroTexto, setFiltroTexto] = useState<string>(''); // filtro por texto na tabela
+  const [ordenacao, setOrdenacao] = useState<{ campo: string; direcao: 'asc' | 'desc' }>({ campo: 'data_documento', direcao: 'desc' });
+
+  const handleOrdenacao = (campo: string) => {
+    setOrdenacao(prev => ({
+      campo,
+      direcao: prev.campo === campo && prev.direcao === 'asc' ? 'desc' : 'asc'
+    }));
+  };
+
+  const ordenarLancamentos = (lancamentos: any[]) => {
+    return [...lancamentos].sort((a, b) => {
+      let valorA, valorB;
+      
+      switch (ordenacao.campo) {
+        case 'descricao':
+          valorA = a.descricao.toLowerCase();
+          valorB = b.descricao.toLowerCase();
+          break;
+        case 'data_vencimento':
+          valorA = a.data_vencimento ? new Date(a.data_vencimento).getTime() : 0;
+          valorB = b.data_vencimento ? new Date(b.data_vencimento).getTime() : 0;
+          break;
+        case 'data_pagamento':
+          valorA = a.data_pagamento ? new Date(a.data_pagamento).getTime() : 0;
+          valorB = b.data_pagamento ? new Date(b.data_pagamento).getTime() : 0;
+          break;
+        case 'valor_total':
+          valorA = a.valor_total;
+          valorB = b.valor_total;
+          break;
+        case 'status':
+          const hoje = new Date();
+          const statusA = a.data_pagamento ? 'Pago' : (a.data_vencimento && new Date(a.data_vencimento) < hoje ? 'Em atraso' : 'Em aberto');
+          const statusB = b.data_pagamento ? 'Pago' : (b.data_vencimento && new Date(b.data_vencimento) < hoje ? 'Em atraso' : 'Em aberto');
+          valorA = statusA;
+          valorB = statusB;
+          break;
+        default:
+          valorA = a.data_documento ? new Date(a.data_documento).getTime() : 0;
+          valorB = b.data_documento ? new Date(b.data_documento).getTime() : 0;
+      }
+      
+      if (valorA < valorB) return ordenacao.direcao === 'asc' ? -1 : 1;
+      if (valorA > valorB) return ordenacao.direcao === 'asc' ? 1 : -1;
+      return 0;
+    });
+  };
 
   useEffect(() => {
     const carregarDados = async () => {
@@ -116,7 +163,8 @@ export const Dashboard: React.FC = () => {
           return dataDocumento >= primeiroDia && dataDocumento <= dataFimCalculada;
         });
         
-        setUltimosLancamentos(lancamentosFiltrados.slice(0, 10));
+        const lancamentosOrdenados = ordenarLancamentos(lancamentosFiltrados);
+        setUltimosLancamentos(lancamentosOrdenados.slice(0, 10));
       } catch (error) {
         console.error('Erro ao carregar dados:', error);
       } finally {
@@ -125,7 +173,7 @@ export const Dashboard: React.FC = () => {
     };
 
     carregarDados();
-  }, [filtroData, filtroPeriodo, dataInicio, dataFim, filtroBanco, filtroStatus, filtroTexto]);
+  }, [filtroData, filtroPeriodo, dataInicio, dataFim, filtroBanco, filtroStatus, filtroTexto, ordenacao]);
 
   if (loading) {
     return (
@@ -445,22 +493,37 @@ export const Dashboard: React.FC = () => {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Tipo
+                    Tipo de Lançamento
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Descrição
+                  <th 
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                    onClick={() => handleOrdenacao('descricao')}
+                  >
+                    Descrição {ordenacao.campo === 'descricao' && (ordenacao.direcao === 'asc' ? '↑' : '↓')}
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Data Vencimento
+                  <th 
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                    onClick={() => handleOrdenacao('data_vencimento')}
+                  >
+                    Data Vencimento {ordenacao.campo === 'data_vencimento' && (ordenacao.direcao === 'asc' ? '↑' : '↓')}
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Data Pagamento
+                  <th 
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                    onClick={() => handleOrdenacao('data_pagamento')}
+                  >
+                    Data Pagamento {ordenacao.campo === 'data_pagamento' && (ordenacao.direcao === 'asc' ? '↑' : '↓')}
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
+                  <th 
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                    onClick={() => handleOrdenacao('status')}
+                  >
+                    Status {ordenacao.campo === 'status' && (ordenacao.direcao === 'asc' ? '↑' : '↓')}
                   </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Valor
+                  <th 
+                    className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                    onClick={() => handleOrdenacao('valor_total')}
+                  >
+                    Valor {ordenacao.campo === 'valor_total' && (ordenacao.direcao === 'asc' ? '↑' : '↓')}
                   </th>
                 </tr>
               </thead>

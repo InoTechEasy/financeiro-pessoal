@@ -5,9 +5,10 @@ import { FormularioBanco } from './FormularioBanco';
 import { ModalLancamento } from '../Lancamentos/ModalLancamento';
 
 export const GerenciadorBancos: React.FC = () => {
-  const { bancos, loading, deletar } = useBancos();
   const [showModal, setShowModal] = useState(false);
   const [editData, setEditData] = useState<any>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const { bancos, loading, deletar } = useBancos(refreshKey);
 
   const handleEdit = (banco: any) => {
     setEditData(banco);
@@ -23,6 +24,7 @@ export const GerenciadorBancos: React.FC = () => {
   const handleSuccess = () => {
     setShowModal(false);
     setEditData(null);
+    setRefreshKey(prev => prev + 1);
   };
 
   if (loading) {
