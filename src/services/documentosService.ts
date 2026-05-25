@@ -3,25 +3,26 @@ import { Documento } from '../types';
 
 export const documentosService = {
   async listar(): Promise<Documento[]> {
-    // Obter user_id do usuário autenticado para multi-tenancy
     const userId = await getCurrentUserId();
     
     const { data, error } = await supabase
       .from('d_documentos')
       .select('*')
       .eq('user_id', userId)
-      .eq('ativo', true)
-      .order('ordem', { ascending: true });
+      .order('created_at', { ascending: false });
 
     if (error) throw error;
     return data || [];
   },
 
-  async obterPorId(id: string): Promise<Documento | null> {
+  async obterPorId(id: number): Promise<Documento | null> {
+    const userId = await getCurrentUserId();
+    
     const { data, error } = await supabase
       .from('d_documentos')
       .select('*')
       .eq('id_documento', id)
+      .eq('user_id', userId)
       .single();
 
     if (error) throw error;
@@ -29,7 +30,6 @@ export const documentosService = {
   },
 
   async criar(documento: Omit<Documento, 'id_documento' | 'created_at'>): Promise<Documento> {
-    // Obter user_id do usuário autenticado para multi-tenancy
     const userId = await getCurrentUserId();
     
     const { data, error } = await supabase
@@ -42,7 +42,7 @@ export const documentosService = {
     return data;
   },
 
-  async atualizar(id: string, updates: Partial<Documento>): Promise<Documento> {
+  async atualizar(id: number, updates: Partial<Documento>): Promise<Documento> {
     const { data, error } = await supabase
       .from('d_documentos')
       .update(updates)
@@ -54,7 +54,7 @@ export const documentosService = {
     return data;
   },
 
-  async deletar(id: string): Promise<void> {
+  async deletar(id: number): Promise<void> {
     const { error } = await supabase
       .from('d_documentos')
       .delete()

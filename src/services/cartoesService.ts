@@ -3,7 +3,6 @@ import { CartaoCredito } from '../types';
 
 export const cartoesService = {
   async listar(): Promise<CartaoCredito[]> {
-    // Obter user_id do usuário autenticado para multi-tenancy
     const userId = await getCurrentUserId();
     
     const { data, error } = await supabase
@@ -17,18 +16,21 @@ export const cartoesService = {
     return data || [];
   },
 
-  async obterPorId(id: string): Promise<CartaoCredito | null> {
+  async obterPorId(id: number): Promise<CartaoCredito | null> {
+    const userId = await getCurrentUserId();
+    
     const { data, error } = await supabase
       .from('d_cartoes_credito')
       .select('*')
-      .eq('id_cartao_credito', id)
+      .eq('id_cartao', id)
+      .eq('user_id', userId)
       .single();
 
     if (error) throw error;
     return data;
   },
 
-  async criar(cartao: Omit<CartaoCredito, 'id_cartao_credito' | 'created_at' | 'updated_at'>): Promise<CartaoCredito> {
+  async criar(cartao: Omit<CartaoCredito, 'id_cartao' | 'created_at'>): Promise<CartaoCredito> {
     const userId = await getCurrentUserId();
     const cartaoComUserId = { ...cartao, user_id: userId };
     
@@ -42,11 +44,11 @@ export const cartoesService = {
     return data;
   },
 
-  async atualizar(id: string, updates: Partial<CartaoCredito>): Promise<CartaoCredito> {
+  async atualizar(id: number, updates: Partial<CartaoCredito>): Promise<CartaoCredito> {
     const { data, error } = await supabase
       .from('d_cartoes_credito')
-      .update({ ...updates, updated_at: new Date().toISOString() })
-      .eq('id_cartao_credito', id)
+      .update(updates)
+      .eq('id_cartao', id)
       .select()
       .single();
 
@@ -54,11 +56,11 @@ export const cartoesService = {
     return data;
   },
 
-  async deletar(id: string): Promise<void> {
+  async deletar(id: number): Promise<void> {
     const { error } = await supabase
       .from('d_cartoes_credito')
-      .update({ ativo: false })
-      .eq('id_cartao_credito', id);
+      .delete()
+      .eq('id_cartao', id);
 
     if (error) throw error;
   },

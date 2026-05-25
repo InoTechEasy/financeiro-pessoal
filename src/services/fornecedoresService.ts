@@ -3,7 +3,6 @@ import { Fornecedor } from '../types';
 
 export const fornecedoresService = {
   async listar(): Promise<Fornecedor[]> {
-    // Obter user_id do usuário autenticado para multi-tenancy
     const userId = await getCurrentUserId();
     
     const { data, error } = await supabase
@@ -17,18 +16,21 @@ export const fornecedoresService = {
     return data || [];
   },
 
-  async obterPorId(id: string): Promise<Fornecedor | null> {
+  async obterPorId(id: number): Promise<Fornecedor | null> {
+    const userId = await getCurrentUserId();
+    
     const { data, error } = await supabase
       .from('d_fornecedores')
       .select('*')
       .eq('id_fornecedor', id)
+      .eq('user_id', userId)
       .single();
 
     if (error) throw error;
     return data;
   },
 
-  async criar(fornecedor: Omit<Fornecedor, 'id_fornecedor' | 'created_at' | 'updated_at'>): Promise<Fornecedor> {
+  async criar(fornecedor: Omit<Fornecedor, 'id_fornecedor' | 'created_at'>): Promise<Fornecedor> {
     const userId = await getCurrentUserId();
     const fornecedorComUserId = { ...fornecedor, user_id: userId };
     
@@ -42,10 +44,10 @@ export const fornecedoresService = {
     return data;
   },
 
-  async atualizar(id: string, updates: Partial<Fornecedor>): Promise<Fornecedor> {
+  async atualizar(id: number, updates: Partial<Fornecedor>): Promise<Fornecedor> {
     const { data, error } = await supabase
       .from('d_fornecedores')
-      .update({ ...updates, updated_at: new Date().toISOString() })
+      .update(updates)
       .eq('id_fornecedor', id)
       .select()
       .single();
@@ -54,10 +56,10 @@ export const fornecedoresService = {
     return data;
   },
 
-  async deletar(id: string): Promise<void> {
+  async deletar(id: number): Promise<void> {
     const { error } = await supabase
       .from('d_fornecedores')
-      .update({ ativo: false })
+      .delete()
       .eq('id_fornecedor', id);
 
     if (error) throw error;

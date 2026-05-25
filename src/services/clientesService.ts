@@ -2,7 +2,6 @@ import { supabase, getCurrentUserId } from './supabaseClient';
 
 export const clientesService = {
   async listar() {
-    // Obter user_id do usuário autenticado para multi-tenancy
     const userId = await getCurrentUserId();
     
     const { data, error } = await supabase
@@ -16,11 +15,14 @@ export const clientesService = {
     return data || [];
   },
 
-  async obterPorId(id: string) {
+  async obterPorId(id: number) {
+    const userId = await getCurrentUserId();
+    
     const { data, error } = await supabase
       .from('d_clientes')
       .select('*')
       .eq('id_cliente', id)
+      .eq('user_id', userId)
       .single();
 
     if (error) throw error;
@@ -41,7 +43,7 @@ export const clientesService = {
     return data;
   },
 
-  async atualizar(id: string, dados: any) {
+  async atualizar(id: number, dados: any) {
     const { data, error } = await supabase
       .from('d_clientes')
       .update(dados)
@@ -53,7 +55,7 @@ export const clientesService = {
     return data;
   },
 
-  async deletar(id: string) {
+  async deletar(id: number) {
     const { error } = await supabase
       .from('d_clientes')
       .delete()
