@@ -20,13 +20,18 @@ export const Dashboard: React.FC = () => {
   const [filtroBanco, setFiltroBanco] = useState<string>(''); // filtro por banco
   const [filtroStatus, setFiltroStatus] = useState<string>(''); // filtro por status
   const [filtroTexto, setFiltroTexto] = useState<string>(''); // filtro por texto na tabela
+  const [filtroTipoLancamento, setFiltroTipoLancamento] = useState<string>(''); // filtro por tipo de lançamento
   const [ordenacao, setOrdenacao] = useState<{ campo: string; direcao: 'asc' | 'desc' }>({ campo: 'data_documento', direcao: 'desc' });
+  const [paginaAtual, setPaginaAtual] = useState(1);
+  const [totalPaginas, setTotalPaginas] = useState(1);
+  const itensPorPagina = 10;
 
   const handleOrdenacao = (campo: string) => {
     setOrdenacao(prev => ({
       campo,
       direcao: prev.campo === campo && prev.direcao === 'asc' ? 'desc' : 'asc'
     }));
+    setPaginaAtual(1);
   };
 
   const ordenarLancamentos = (lancamentos: any[]) => {
@@ -156,6 +161,11 @@ export const Dashboard: React.FC = () => {
             return false;
           }
           
+          // Filtro por tipo de lançamento
+          if (filtroTipoLancamento && l.id_tipo_lancamento !== filtroTipoLancamento) {
+            return false;
+          }
+          
           const dataFimCalculada = filtroPeriodo === 'personalizado' && dataFim 
             ? new Date(dataFim)
             : hoje;
@@ -164,7 +174,11 @@ export const Dashboard: React.FC = () => {
         });
         
         const lancamentosOrdenados = ordenarLancamentos(lancamentosFiltrados);
-        setUltimosLancamentos(lancamentosOrdenados.slice(0, 10));
+        const totalPaginasCalculado = Math.ceil(lancamentosOrdenados.length / itensPorPagina);
+        setTotalPaginas(totalPaginasCalculado);
+        const indiceInicio = (paginaAtual - 1) * itensPorPagina;
+        const indiceFim = indiceInicio + itensPorPagina;
+        setUltimosLancamentos(lancamentosOrdenados.slice(indiceInicio, indiceFim));
       } catch (error) {
         console.error('Erro ao carregar dados:', error);
       } finally {
@@ -173,7 +187,7 @@ export const Dashboard: React.FC = () => {
     };
 
     carregarDados();
-  }, [filtroData, filtroPeriodo, dataInicio, dataFim, filtroBanco, filtroStatus, filtroTexto, ordenacao]);
+  }, [filtroData, filtroPeriodo, dataInicio, dataFim, filtroBanco, filtroStatus, filtroTexto, filtroTipoLancamento, ordenacao, paginaAtual]);
 
   if (loading) {
     return (
@@ -476,20 +490,35 @@ export const Dashboard: React.FC = () => {
       <div className="bg-white rounded-lg shadow-md p-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-gray-900">Últimos Lançamentos</h3>
-          <input
-            type="text"
-            placeholder="Filtrar por descrição..."
-            value={filtroTexto}
-            onChange={(e) => setFiltroTexto(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md text-sm w-64"
-          />
+          <div className="flex items-center space-x-2">
+            <select
+              value={filtroTipoLancamento}
+              onChange={(e) => setFiltroTipoLancamento(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+            >
+              <option value="">Todos os tipos</option>
+              {tiposLancamentos.map((tipo) => (
+                <option key={tipo.id_tipo_lancamento} value={tipo.id_tipo_lancamento}>
+                  {tipo.nome}
+                </option>
+              ))}
+            </select>
+            <input
+              type="text"
+              placeholder="Filtrar por descrição..."
+              value={filtroTexto}
+              onChange={(e) => setFiltroTexto(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-md text-sm w-64"
+            />
+          </div>
         </div>
         
         {ultimosLancamentos.length === 0 ? (
           <p className="text-gray-500 text-center py-8">Nenhum lançamento encontrado</p>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
+          <>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -546,11 +575,12 @@ export const Dashboard: React.FC = () => {
 
                   const receitaId = tiposLancamentos.find(t => t.nome === 'RECEITA' || t.nome === 'Receita')?.id_tipo_lancamento;
                   const despesaId = tiposLancamentos.find(t => t.nome === 'DESPESA' || t.nome === 'Despesa')?.id_tipo_lancamento;
+                  const tipoLancamento = tiposLancamentos.find(t => t.id_tipo_lancamento === lancamento.id_tipo_lancamento);
 
                   return (
                     <tr key={lancamento.id_lancamento} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="text-2xl">{getIconePorTipo(lancamento.id_tipo_lancamento)}</span>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {tipoLancamento?.nome || '-'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {lancamento.descricao}
@@ -575,6 +605,45 @@ export const Dashboard: React.FC = () => {
               </tbody>
             </table>
           </div>
+          {totalPaginas > 1 && (
+            <div className="flex items-center justify-between mt-4">
+              <div className="text-sm text-gray-500">
+                Página {paginaAtual} de {totalPaginas}
+              </div>
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => setPaginaAtual(paginaAtual - 1)}
+                  disabled={paginaAtual === 1}
+                  className="px-3 py-1 border border-gray-300 rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                >
+                  Anterior
+                </button>
+                <div className="flex items-center space-x-1">
+                  {Array.from({ length: totalPaginas }, (_, i) => i + 1).map((pagina) => (
+                    <button
+                      key={pagina}
+                      onClick={() => setPaginaAtual(pagina)}
+                      className={`px-3 py-1 border rounded-md text-sm ${
+                        pagina === paginaAtual
+                          ? 'bg-blue-600 text-white border-blue-600'
+                          : 'border-gray-300 hover:bg-gray-50'
+                      }`}
+                    >
+                      {pagina}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  onClick={() => setPaginaAtual(paginaAtual + 1)}
+                  disabled={paginaAtual === totalPaginas}
+                  className="px-3 py-1 border border-gray-300 rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                >
+                  Próxima
+                </button>
+              </div>
+            </div>
+          )}
+          </>
         )}
       </div>
     </div>
