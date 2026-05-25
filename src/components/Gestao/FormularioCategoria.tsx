@@ -9,7 +9,6 @@ interface FormularioCategoriaProps {
 
 export const FormularioCategoria: React.FC<FormularioCategoriaProps> = ({ onSuccess, editData }) => {
   const [categorias, setCategorias] = useState<any[]>([]);
-  const [ordemSugerida, setOrdemSugerida] = useState<number>(1);
 
   const { register, handleSubmit, reset, formState: { errors }, setValue } = useForm({
     defaultValues: editData || {},
@@ -21,12 +20,8 @@ export const FormularioCategoria: React.FC<FormularioCategoriaProps> = ({ onSucc
         const data = await categoriasService.listar();
         setCategorias(data);
 
-        // Se tem id_pai (subcategoria), calcular ordem sugerida e preencher select
+        // Se tem id_pai (subcategoria), preencher select
         if (editData?.id_pai) {
-          const subcategorias = data.filter(c => c.id_pai === editData.id_pai);
-          const maxOrdem = subcategorias.length > 0 ? Math.max(...subcategorias.map(c => c.ordem || 0)) : 0;
-          setOrdemSugerida(maxOrdem + 1);
-          setValue('ordem', maxOrdem + 1);
           setValue('id_pai', editData.id_pai);
         }
       } catch (error) {
@@ -90,7 +85,7 @@ export const FormularioCategoria: React.FC<FormularioCategoriaProps> = ({ onSucc
         />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Ícone</label>
           <input
@@ -106,17 +101,6 @@ export const FormularioCategoria: React.FC<FormularioCategoriaProps> = ({ onSucc
             {...register('cor_hex')}
             className="w-full px-3 py-2 border border-gray-300 rounded-md"
             placeholder="#FF6B6B"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Ordem {editData?.id_pai && `(Sugerida: ${ordemSugerida})`}</label>
-          <input
-            type="number"
-            {...register('ordem', { valueAsNumber: true })}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md"
-            placeholder={editData?.id_pai ? String(ordemSugerida) : "1"}
-            defaultValue={editData?.id_pai ? ordemSugerida : undefined}
           />
         </div>
       </div>

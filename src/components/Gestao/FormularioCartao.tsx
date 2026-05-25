@@ -33,7 +33,7 @@ export const FormularioCartao: React.FC<FormularioCartaoProps> = ({ onSuccess, e
   const onSubmit = async (data: any) => {
     try {
       if (editData) {
-        await cartoesService.atualizar(editData.id_cartao_credito, data);
+        await cartoesService.atualizar(editData.id_cartao, data);
         alert('Cartão atualizado com sucesso!');
       } else {
         await cartoesService.criar(data);
@@ -65,7 +65,7 @@ export const FormularioCartao: React.FC<FormularioCartaoProps> = ({ onSuccess, e
             </option>
           ))}
         </select>
-        {errors.id_banco && <span className="text-red-500 text-sm">{errors.id_banco.message}</span>}
+        {errors.id_banco && <span className="text-red-500 text-sm">{String(errors.id_banco.message)}</span>}
       </div>
 
       <div>
@@ -75,7 +75,7 @@ export const FormularioCartao: React.FC<FormularioCartaoProps> = ({ onSuccess, e
           className="w-full px-3 py-2 border border-gray-300 rounded-md"
           placeholder="Nome do cartão"
         />
-        {errors.nome && <span className="text-red-500 text-sm">{errors.nome.message}</span>}
+        {errors.nome && <span className="text-red-500 text-sm">{String(errors.nome.message)}</span>}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

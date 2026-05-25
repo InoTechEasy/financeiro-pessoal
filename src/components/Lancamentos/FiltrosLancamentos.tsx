@@ -78,9 +78,10 @@ export const FiltrosLancamentos: React.FC = () => {
           <label className="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
           <select className="w-full px-3 py-2 border border-gray-300 rounded-md">
             <option value="">Todos</option>
-            <option value="RECEITA">Receita</option>
-            <option value="DESPESA">Despesa</option>
-            <option value="INVESTIMENTO">Investimento</option>
+            <option value="Receita">Receita</option>
+            <option value="Despesa">Despesa</option>
+            <option value="Investimento">Investimento</option>
+            <option value="Transferência">Transferência</option>
           </select>
         </div>
         <div>
