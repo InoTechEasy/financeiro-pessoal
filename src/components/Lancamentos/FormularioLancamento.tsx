@@ -12,7 +12,6 @@ import { bancosService } from '../../services/bancosService';
 import { cartoesService } from '../../services/cartoesService';
 import { fornecedoresService } from '../../services/fornecedoresService';
 import { clientesService } from '../../services/clientesService';
-import { documentosService } from '../../services/documentosService';
 
 interface FormularioLancamentoProps {
   onSuccess?: () => void;
@@ -32,7 +31,6 @@ export const FormularioLancamento: React.FC<FormularioLancamentoProps> = ({ onSu
   const [cartoes, setCartoes] = useState<any[]>([]);
   const [fornecedores, setFornecedores] = useState<any[]>([]);
   const [clientes, setClientes] = useState<any[]>([]);
-  const [documentos, setDocumentos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Estados para parcelas manuais
@@ -41,21 +39,19 @@ export const FormularioLancamento: React.FC<FormularioLancamentoProps> = ({ onSu
   const [parcelasManuais, setParcelasManuais] = useState<Array<{ valor: number; data_vencimento: string }>>([]);
 
   const tipoLancamentoId = watch('id_tipo_lancamento');
-  const tipoLancamento = tiposLancamentos.find(t => t.id_tipo_lancamento === tipoLancamentoId);
 
   const tipoPagamentoId = watch('id_tipo_pagamento');
   const tipoPagamento = tiposPagamentos.find(t => t.id_tipo_pagamento === tipoPagamentoId)?.nome;
 
   // Encontrar IDs dos tipos de lançamento por nome (para compatibilidade)
-  const receitaTipoId = tiposLancamentos.find(t => t.nome === 'RECEITA' || t.nome === 'Receita')?.id_tipo_lancamento;
-  const despesaTipoId = tiposLancamentos.find(t => t.nome === 'DESPESA' || t.nome === 'Despesa')?.id_tipo_lancamento;
-  const investimentoTipoId = tiposLancamentos.find(t => t.nome === 'INVESTIMENTO' || t.nome === 'Investimento')?.id_tipo_lancamento;
-  const transferenciaTipoId = tiposLancamentos.find(t => t.nome === 'TRANSFERENCIA' || t.nome === 'Transferência' || t.nome === 'Transferência entre contas')?.id_tipo_lancamento;
+  const receitaTipoId = tiposLancamentos.find(t => t.nome === 'Receita')?.id_tipo_lancamento;
+  const despesaTipoId = tiposLancamentos.find(t => t.nome === 'Despesa')?.id_tipo_lancamento;
+  const investimentoTipoId = tiposLancamentos.find(t => t.nome === 'Investimento')?.id_tipo_lancamento;
 
   useEffect(() => {
     const carregarDados = async () => {
       try {
-        const [tipos, recs, cats, invs, tps, bcos, crts, forns, clis, docs] = await Promise.all([
+        const [tipos, recs, cats, invs, tps, bcos, crts, forns, clis] = await Promise.all([
           tiposLancamentosService.listar(),
           receitasService.listar(),
           categoriasService.listar(),
@@ -65,7 +61,6 @@ export const FormularioLancamento: React.FC<FormularioLancamentoProps> = ({ onSu
           cartoesService.listar(),
           fornecedoresService.listar(),
           clientesService.listar(),
-          documentosService.listar(),
         ]);
         setTiposLancamentos(tipos);
         setReceitas(recs);
@@ -76,7 +71,6 @@ export const FormularioLancamento: React.FC<FormularioLancamentoProps> = ({ onSu
         setCartoes(crts);
         setFornecedores(forns);
         setClientes(clis);
-        setDocumentos(docs);
       } catch (error) {
         console.error('Erro ao carregar dados:', error);
       } finally {
@@ -88,11 +82,6 @@ export const FormularioLancamento: React.FC<FormularioLancamentoProps> = ({ onSu
 
   const onSubmit = async (data: any) => {
     try {
-      // Se o tipo for Transferência, automaticamente marcar como transferência
-      if (data.id_tipo_lancamento === transferenciaTipoId) {
-        data.eh_transferencia = true;
-      }
-
       // Verificar o modo de parcelas
       if (modoParcelas === 'automatico' && numParcelas > 1) {
         // Criar múltiplos lançamentos para cada parcela (divisão automática)
@@ -107,22 +96,17 @@ export const FormularioLancamento: React.FC<FormularioLancamentoProps> = ({ onSu
           // Converter campos vazios em null
           const dadosParaEnviar = {
             ...data,
-            data_documento: data.data_documento || null,
             data_pagamento: null, // Parcelas não têm pagamento inicial
             data_vencimento: dataVencimentoParcela.toISOString().split('T')[0],
             id_receita: data.id_receita || null,
             id_categoria_despesa: data.id_categoria_despesa || null,
             id_investimento: data.id_investimento || null,
-            id_documento: data.id_documento || null,
             id_fornecedor: data.id_fornecedor || null,
             id_cliente: data.id_cliente || null,
-            id_cartao_credito: data.id_cartao_credito || null,
-            id_banco_destino: data.id_banco_destino || null,
-            eh_transferencia: data.eh_transferencia || false,
-            n_documento: data.n_documento || null,
-            parcelas: `${i + 1}/${numParcelas}`,
+            id_cartao: data.id_cartao || null,
             valor_parcela: valorPorParcela,
-            valor_total: valorPorParcela,
+            numero_parcelas: numParcelas,
+            parcela_atual: i + 1,
             observacoes: data.observacoes || null,
           };
 
@@ -138,22 +122,17 @@ export const FormularioLancamento: React.FC<FormularioLancamentoProps> = ({ onSu
           // Converter campos vazios em null
           const dadosParaEnviar = {
             ...data,
-            data_documento: data.data_documento || null,
             data_pagamento: null, // Parcelas não têm pagamento inicial
             data_vencimento: parcela.data_vencimento || null,
             id_receita: data.id_receita || null,
             id_categoria_despesa: data.id_categoria_despesa || null,
             id_investimento: data.id_investimento || null,
-            id_documento: data.id_documento || null,
             id_fornecedor: data.id_fornecedor || null,
             id_cliente: data.id_cliente || null,
-            id_cartao_credito: data.id_cartao_credito || null,
-            id_banco_destino: data.id_banco_destino || null,
-            eh_transferencia: data.eh_transferencia || false,
-            n_documento: data.n_documento || null,
-            parcelas: `${i + 1}/${parcelasManuais.length}`,
+            id_cartao: data.id_cartao || null,
             valor_parcela: parcela.valor,
-            valor_total: parcela.valor,
+            numero_parcelas: parcelasManuais.length,
+            parcela_atual: i + 1,
             observacoes: data.observacoes || null,
           };
 
@@ -165,21 +144,17 @@ export const FormularioLancamento: React.FC<FormularioLancamentoProps> = ({ onSu
         // Criar lançamento único
         const dadosParaEnviar = {
           ...data,
-          data_documento: data.data_documento || null,
           data_pagamento: data.data_pagamento || null,
           data_vencimento: data.data_vencimento || null,
           id_receita: data.id_receita || null,
           id_categoria_despesa: data.id_categoria_despesa || null,
           id_investimento: data.id_investimento || null,
-          id_documento: data.id_documento || null,
           id_fornecedor: data.id_fornecedor || null,
           id_cliente: data.id_cliente || null,
-          id_cartao_credito: data.id_cartao_credito || null,
-          id_banco_destino: data.id_banco_destino || null,
-          eh_transferencia: data.eh_transferencia || false,
-          n_documento: data.n_documento || null,
-          parcelas: data.parcelas || null,
+          id_cartao: data.id_cartao || null,
           valor_parcela: data.valor_parcela || null,
+          numero_parcelas: data.numero_parcelas || null,
+          parcela_atual: data.parcela_atual || null,
           observacoes: data.observacoes || null,
         };
 
@@ -242,15 +217,6 @@ export const FormularioLancamento: React.FC<FormularioLancamentoProps> = ({ onSu
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Data do Documento</label>
-          <input
-            type="date"
-            {...register('data_documento')}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md"
-          />
-        </div>
-
-        <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Data de Vencimento</label>
           <input
             type="date"
@@ -258,9 +224,7 @@ export const FormularioLancamento: React.FC<FormularioLancamentoProps> = ({ onSu
             className="w-full px-3 py-2 border border-gray-300 rounded-md"
           />
         </div>
-      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Data de Pagamento</label>
           <input
@@ -269,7 +233,9 @@ export const FormularioLancamento: React.FC<FormularioLancamentoProps> = ({ onSu
             className="w-full px-3 py-2 border border-gray-300 rounded-md"
           />
         </div>
+      </div>
 
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de Pagamento *</label>
           <select
@@ -285,29 +251,11 @@ export const FormularioLancamento: React.FC<FormularioLancamentoProps> = ({ onSu
           </select>
           {errors.id_tipo_pagamento && <span className="text-red-500 text-sm">{errors.id_tipo_pagamento.message}</span>}
         </div>
-      </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Banco *</label>
-        <select
-          {...register('id_banco')}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md"
-        >
-          <option value="">Selecione...</option>
-          {bancos.map((banco) => (
-            <option key={banco.id_banco} value={banco.id_banco}>
-              {banco.nome}
-            </option>
-          ))}
-        </select>
-        {errors.id_banco && <span className="text-red-500 text-sm">{errors.id_banco.message}</span>}
-      </div>
-
-      {tipoLancamentoId === transferenciaTipoId && (
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Banco de Destino *</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Banco *</label>
           <select
-            {...register('id_banco_destino')}
+            {...register('id_banco')}
             className="w-full px-3 py-2 border border-gray-300 rounded-md"
           >
             <option value="">Selecione...</option>
@@ -317,9 +265,9 @@ export const FormularioLancamento: React.FC<FormularioLancamentoProps> = ({ onSu
               </option>
             ))}
           </select>
-          {errors.id_banco_destino && <span className="text-red-500 text-sm">{errors.id_banco_destino.message}</span>}
+          {errors.id_banco && <span className="text-red-500 text-sm">{errors.id_banco.message}</span>}
         </div>
-      )}
+      </div>
 
       {tipoLancamentoId === receitaTipoId && (
         <>
@@ -418,45 +366,21 @@ export const FormularioLancamento: React.FC<FormularioLancamentoProps> = ({ onSu
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Cartão de Crédito *</label>
           <select
-            {...register('id_cartao_credito')}
+            {...register('id_cartao')}
             className="w-full px-3 py-2 border border-gray-300 rounded-md"
           >
             <option value="">Selecione...</option>
             {cartoes.map((cartao) => (
-              <option key={cartao.id_cartao_credito} value={cartao.id_cartao_credito}>
+              <option key={cartao.id_cartao} value={cartao.id_cartao}>
                 {cartao.nome}
               </option>
             ))}
           </select>
-          {errors.id_cartao_credito && <span className="text-red-500 text-sm">{errors.id_cartao_credito.message}</span>}
+          {errors.id_cartao && <span className="text-red-500 text-sm">{errors.id_cartao.message}</span>}
         </div>
       )}
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de Documento</label>
-        <select
-          {...register('id_documento')}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md"
-        >
-          <option value="">Selecione...</option>
-          {documentos.filter(d => !d.id_pai).map((documento) => (
-            <option key={documento.id_documento} value={documento.id_documento}>
-              {documento.nome}
-            </option>
-          ))}
-        </select>
-      </div>
-
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Número do Documento</label>
-          <input
-            {...register('n_documento')}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md"
-            placeholder="Número do documento"
-          />
-        </div>
-
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Parcelas</label>
           <div className="space-y-2">
@@ -499,7 +423,6 @@ export const FormularioLancamento: React.FC<FormularioLancamentoProps> = ({ onSu
             <div className="mt-2">
               <input
                 type="number"
-                {...register('parcelas')}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md"
                 placeholder="Número de parcelas"
                 min="2"
