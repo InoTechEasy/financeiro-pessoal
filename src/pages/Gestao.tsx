@@ -8,7 +8,6 @@ import { GerenciadorCategoriasDespesas } from '../components/Gestao/GerenciadorC
 import { GerenciadorBancos } from '../components/Gestao/GerenciadorBancos';
 import { GerenciadorCartoes } from '../components/Gestao/GerenciadorCartoes';
 import { GerenciadorFornecedores } from '../components/Gestao/GerenciadorFornecedores';
-import { GerenciadorDocumentos } from '../components/Gestao/GerenciadorDocumentos';
 
 export const Gestao: React.FC = () => {
   const [activeTab, setActiveTab] = useState('tipos-lancamentos');
@@ -107,16 +106,6 @@ export const Gestao: React.FC = () => {
           >
             Fornecedores
           </button>
-          <button
-            onClick={() => setActiveTab('documentos')}
-            className={`px-4 py-2 font-medium transition-colors ${
-              activeTab === 'documentos'
-                ? 'text-blue-600 border-b-2 border-blue-600'
-                : 'text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            Documentos
-          </button>
         </div>
       </div>
 
@@ -129,7 +118,6 @@ export const Gestao: React.FC = () => {
       {activeTab === 'bancos' && <GerenciadorBancos />}
       {activeTab === 'cartoes' && <GerenciadorCartoes />}
       {activeTab === 'fornecedores' && <GerenciadorFornecedores />}
-      {activeTab === 'documentos' && <GerenciadorDocumentos />}
     </div>
   );
 };
