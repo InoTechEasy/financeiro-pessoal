@@ -199,6 +199,20 @@ export const Dashboard: React.FC = () => {
 
   const saldo = resumo.saldoInicial + resumo.receitas - resumo.despesas - resumo.investimentos;
 
+  const calcularStatus = (lancamento: any) => {
+    const hoje = new Date();
+    const dataVencimento = lancamento.data_vencimento ? new Date(lancamento.data_vencimento) : null;
+    const dataPagamento = lancamento.data_pagamento ? new Date(lancamento.data_pagamento) : null;
+    
+    if (dataPagamento) {
+      return { texto: 'Pago', cor: 'text-green-600' };
+    } else if (dataVencimento && dataVencimento < hoje) {
+      return { texto: 'Em atraso', cor: 'text-red-600' };
+    } else {
+      return { texto: 'Em aberto', cor: 'text-yellow-600' };
+    }
+  };
+
   const handleExportarPDF = () => {
     // Encontrar IDs dos tipos de lançamento
     const receitaId = tiposLancamentos.find(t => t.nome === 'RECEITA' || t.nome === 'Receita')?.id_tipo_lancamento;
@@ -517,7 +531,42 @@ export const Dashboard: React.FC = () => {
           <p className="text-gray-500 text-center py-8">Nenhum lançamento encontrado</p>
         ) : (
           <>
-            <div className="overflow-x-auto">
+            {/* Cards para mobile, tabela para desktop */}
+            <div className="lg:hidden space-y-3">
+              {ultimosLancamentos.map((lancamento: any) => {
+                const status = calcularStatus(lancamento);
+                const receitaId = tiposLancamentos.find(t => t.nome === 'RECEITA' || t.nome === 'Receita')?.id_tipo_lancamento;
+                const despesaId = tiposLancamentos.find(t => t.nome === 'DESPESA' || t.nome === 'Despesa')?.id_tipo_lancamento;
+                const tipoLancamento = tiposLancamentos.find(t => t.id_tipo_lancamento === lancamento.id_tipo_lancamento);
+                
+                return (
+                  <div key={lancamento.id_lancamento} className="bg-white rounded-lg shadow-md p-4 border border-gray-200">
+                    <div className="flex justify-between items-start mb-2">
+                      <div className="flex-1">
+                        <p className="text-xs text-gray-500 mb-1">{tipoLancamento?.nome || '-'}</p>
+                        <p className="font-medium text-gray-900">{lancamento.descricao}</p>
+                      </div>
+                      <span className={`text-sm font-bold ${
+                        lancamento.id_tipo_lancamento === receitaId ? 'text-green-600' : 
+                        lancamento.id_tipo_lancamento === despesaId ? 'text-red-600' : 'text-blue-600'
+                      }`}>
+                        {formatCurrency(lancamento.valor_total)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center text-sm">
+                      <div className="space-y-1">
+                        <p className="text-gray-500">Venc: {formatDate(lancamento.data_vencimento || '-')}</p>
+                        <p className="text-gray-500">Pag: {formatDate(lancamento.data_pagamento || '-')}</p>
+                      </div>
+                      <span className={`text-xs font-medium ${status.cor}`}>{status.texto}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            
+            {/* Tabela para desktop */}
+            <div className="hidden lg:block overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
