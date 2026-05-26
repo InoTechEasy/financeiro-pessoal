@@ -46,12 +46,14 @@ export const FormularioCategoria: React.FC<FormularioCategoriaProps> = ({ onSucc
           data.id_pai = null;
         }
         // Garante que ativo seja true ao criar nova categoria
-        const dadosParaCriar = {
-          ...data,
+        // Remove id_categoria_despesa se estiver presente (não deve ser enviado na criação)
+        const { id_categoria_despesa, ...dadosParaCriar } = data;
+        const dadosComAtivo = {
+          ...dadosParaCriar,
           ativo: true,
         };
-        console.log('Criando categoria:', dadosParaCriar);
-        await categoriasService.criar(dadosParaCriar);
+        console.log('Criando categoria:', dadosComAtivo);
+        await categoriasService.criar(dadosComAtivo);
         alert('Categoria criada com sucesso!');
         reset();
       }
@@ -79,6 +81,7 @@ export const FormularioCategoria: React.FC<FormularioCategoriaProps> = ({ onSucc
         <select
           {...register('id_pai', { valueAsNumber: true })}
           className="w-full px-3 py-2 border border-gray-300 rounded-md"
+          disabled={!!editData?.id_pai}
         >
           <option value="">Nenhuma (Categoria Principal)</option>
           {categorias.filter(c => !c.id_pai).map((categoria) => (
@@ -87,6 +90,11 @@ export const FormularioCategoria: React.FC<FormularioCategoriaProps> = ({ onSucc
             </option>
           ))}
         </select>
+        {editData?.id_pai && (
+          <p className="text-sm text-gray-500 mt-1">
+            Categoria Pai: {categorias.find(c => c.id_categoria_despesa === editData.id_pai)?.nome}
+          </p>
+        )}
       </div>
 
       <div>

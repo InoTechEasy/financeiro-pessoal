@@ -74,7 +74,7 @@ export const Gestao: React.FC = () => {
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
-            Categorias
+            Categorias de Despesas
           </button>
           <button
             onClick={() => setActiveTab('bancos')}
