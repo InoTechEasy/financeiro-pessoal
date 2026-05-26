@@ -34,6 +34,7 @@ export const FormularioCategoria: React.FC<FormularioCategoriaProps> = ({ onSucc
   const onSubmit = async (data: any) => {
     try {
       console.log('Dados do formulário:', data);
+      console.log('editData:', editData);
       
       // Verifica se é edição (tem id_categoria_despesa) ou criação nova
       if (editData?.id_categoria_despesa) {
@@ -46,13 +47,13 @@ export const FormularioCategoria: React.FC<FormularioCategoriaProps> = ({ onSucc
           data.id_pai = null;
         }
         // Garante que ativo seja true ao criar nova categoria
-        // Remove id_categoria_despesa se estiver presente (não deve ser enviado na criação)
-        const { id_categoria_despesa, ...dadosParaCriar } = data;
+        // Remove id_categoria_despesa, created_at, user_id se estiverem presentes (não devem ser enviados na criação)
+        const { id_categoria_despesa, created_at, user_id, ...dadosParaCriar } = data;
         const dadosComAtivo = {
           ...dadosParaCriar,
           ativo: true,
         };
-        console.log('Criando categoria:', dadosComAtivo);
+        console.log('Criando categoria (dados limpos):', dadosComAtivo);
         await categoriasService.criar(dadosComAtivo);
         alert('Categoria criada com sucesso!');
         reset();

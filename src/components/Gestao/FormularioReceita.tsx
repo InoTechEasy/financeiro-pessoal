@@ -15,6 +15,7 @@ export const FormularioReceita: React.FC<FormularioReceitaProps> = ({ onSuccess,
   const onSubmit = async (data: any) => {
     try {
       console.log('Dados do formulário:', data);
+      console.log('editData:', editData);
       
       // Verifica se é edição (tem id_receita) ou criação nova
       if (editData?.id_receita) {
@@ -23,12 +24,14 @@ export const FormularioReceita: React.FC<FormularioReceitaProps> = ({ onSuccess,
         alert('Receita atualizada com sucesso!');
       } else {
         // Garante que ativo seja true ao criar nova receita
-        const dadosParaCriar = {
-          ...data,
+        // Remove id_receita, created_at, user_id se estiverem presentes (não devem ser enviados na criação)
+        const { id_receita, created_at, user_id, ...dadosParaCriar } = data;
+        const dadosComAtivo = {
+          ...dadosParaCriar,
           ativo: true,
         };
-        console.log('Criando receita:', dadosParaCriar);
-        await receitasService.criar(dadosParaCriar);
+        console.log('Criando receita (dados limpos):', dadosComAtivo);
+        await receitasService.criar(dadosComAtivo);
         alert('Receita criada com sucesso!');
         reset();
       }
