@@ -345,6 +345,21 @@ CREATE POLICY "Users can delete own data" ON d_documentos
   FOR DELETE USING (auth.uid() = user_id);
 
 -- Criar índices para melhorar performance
+DROP INDEX IF EXISTS idx_lancamentos_user_id;
+DROP INDEX IF EXISTS idx_lancamentos_tipo;
+DROP INDEX IF EXISTS idx_lancamentos_data_vencimento;
+DROP INDEX IF EXISTS idx_bancos_user_id;
+DROP INDEX IF EXISTS idx_cartoes_user_id;
+DROP INDEX IF EXISTS idx_clientes_user_id;
+DROP INDEX IF EXISTS idx_fornecedores_user_id;
+DROP INDEX IF EXISTS idx_conciliacao_user_id;
+DROP INDEX IF EXISTS idx_documentos_user_id;
+DROP INDEX IF EXISTS idx_tipos_lancamentos_user_id;
+DROP INDEX IF EXISTS idx_tipos_pagamentos_user_id;
+DROP INDEX IF EXISTS idx_categorias_user_id;
+DROP INDEX IF EXISTS idx_receitas_user_id;
+DROP INDEX IF EXISTS idx_investimentos_user_id;
+
 CREATE INDEX idx_lancamentos_user_id ON f_lancamentos(user_id);
 CREATE INDEX idx_lancamentos_tipo ON f_lancamentos(id_tipo_lancamento);
 CREATE INDEX idx_lancamentos_data_vencimento ON f_lancamentos(data_vencimento);
