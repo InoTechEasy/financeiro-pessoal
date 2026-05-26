@@ -40,24 +40,13 @@ export const FormularioFornecedor: React.FC<FormularioFornecedorProps> = ({ onSu
         {errors.nome && <span className="text-red-500 text-sm">{String(errors.nome.message)}</span>}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
-          <input
-            {...register('tipo')}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md"
-            placeholder="Pessoa Física/Jurídica"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">CPF/CNPJ</label>
-          <input
-            {...register('cpf_cnpj')}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md"
-            placeholder="000.000.000-00"
-          />
-        </div>
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">CNPJ</label>
+        <input
+          {...register('cnpj')}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md"
+          placeholder="00.000.000/0000-00"
+        />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -79,16 +68,6 @@ export const FormularioFornecedor: React.FC<FormularioFornecedorProps> = ({ onSu
             placeholder="(11) 99999-9999"
           />
         </div>
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Endereço</label>
-        <textarea
-          {...register('endereco')}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md"
-          rows={3}
-          placeholder="Endereço completo"
-        />
       </div>
 
       <button

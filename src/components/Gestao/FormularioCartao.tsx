@@ -80,32 +80,31 @@ export const FormularioCartao: React.FC<FormularioCartaoProps> = ({ onSuccess, e
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Últimos 4 Dígitos</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Número</label>
           <input
-            {...register('ultimos_digitos')}
+            {...register('numero')}
             className="w-full px-3 py-2 border border-gray-300 rounded-md"
-            placeholder="1234"
-            maxLength={4}
+            placeholder="**** **** **** 1234"
           />
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Bandeira</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Validade</label>
           <input
-            {...register('bandeira')}
+            {...register('validade')}
             className="w-full px-3 py-2 border border-gray-300 rounded-md"
-            placeholder="Visa"
+            placeholder="MM/AA"
           />
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Limite de Crédito</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Limite</label>
           <input
             type="number"
             step="0.01"
-            {...register('limite_credito', { valueAsNumber: true })}
+            {...register('limite', { valueAsNumber: true })}
             className="w-full px-3 py-2 border border-gray-300 rounded-md"
             placeholder="0.00"
           />
@@ -115,7 +114,7 @@ export const FormularioCartao: React.FC<FormularioCartaoProps> = ({ onSuccess, e
           <label className="block text-sm font-medium text-gray-700 mb-1">Dia de Vencimento</label>
           <input
             type="number"
-            {...register('data_vencimento_fatura', { valueAsNumber: true })}
+            {...register('dia_vencimento', { valueAsNumber: true })}
             className="w-full px-3 py-2 border border-gray-300 rounded-md"
             placeholder="10"
             min={1}

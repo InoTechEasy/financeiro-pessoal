@@ -51,26 +51,6 @@ export const FormularioReceita: React.FC<FormularioReceitaProps> = ({ onSuccess,
         />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Ícone</label>
-          <input
-            {...register('icone')}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md"
-            placeholder="💰"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Cor (Hex)</label>
-          <input
-            {...register('cor_hex')}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md"
-            placeholder="#00AA00"
-          />
-        </div>
-      </div>
-
       <button
         type="submit"
         className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition"
