@@ -21,32 +21,21 @@ export const lancamentoSchema = z.object({
 });
 
 export const receitaSchema = z.object({
-  id_pai: z.string().uuid().nullable().optional(),
   nome: z.string().min(2, 'Nome deve ter no mínimo 2 caracteres'),
   descricao: z.string().optional(),
-  icone: z.string().optional(),
-  cor_hex: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Cor inválida').optional(),
-  ordem: z.number().int().optional(),
   ativo: z.boolean().default(true),
 });
 
 export const investimentoSchema = z.object({
-  id_pai: z.string().uuid().nullable().optional(),
   nome: z.string().min(2, 'Nome deve ter no mínimo 2 caracteres'),
   descricao: z.string().optional(),
-  icone: z.string().optional(),
-  cor_hex: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Cor inválida').optional(),
-  ordem: z.number().int().optional(),
   ativo: z.boolean().default(true),
 });
 
 export const categoriaSchema = z.object({
-  id_pai: z.string().uuid().nullable().optional(),
+  id_pai: z.number().nullable().optional(),
   nome: z.string().min(2, 'Nome deve ter no mínimo 2 caracteres'),
   descricao: z.string().optional(),
-  icone: z.string().optional(),
-  cor_hex: z.string().regex(/^#[0-9A-Fa-f]{6}$/, 'Cor inválida').optional(),
-  ordem: z.number().int().optional(),
   ativo: z.boolean().default(true),
 });
 
@@ -61,21 +50,19 @@ export const bancoSchema = z.object({
 });
 
 export const cartaoSchema = z.object({
-  id_banco: z.string().uuid('Banco inválido'),
+  id_banco: z.number({ required_error: 'Banco é obrigatório' }),
   nome: z.string().min(2, 'Nome deve ter no mínimo 2 caracteres'),
-  ultimos_digitos: z.string().length(4, 'Últimos 4 dígitos inválidos').optional(),
-  bandeira: z.string().optional(),
-  limite_credito: z.number().positive().optional(),
-  data_vencimento_fatura: z.number().int().min(1).max(31).optional(),
+  numero: z.string().optional(),
+  validade: z.string().optional(),
+  limite: z.number().positive().optional(),
+  dia_vencimento: z.number().int().min(1).max(31).optional(),
   ativo: z.boolean().default(true),
 });
 
 export const fornecedorSchema = z.object({
   nome: z.string().min(2, 'Nome deve ter no mínimo 2 caracteres'),
-  tipo: z.string().optional(),
-  cpf_cnpj: z.string().optional(),
+  cnpj: z.string().optional(),
   email: z.string().email('Email inválido').optional().or(z.literal('')),
   telefone: z.string().optional(),
-  endereco: z.string().optional(),
   ativo: z.boolean().default(true),
 });
