@@ -61,7 +61,6 @@ export interface Banco extends DimensaoBase {
   tipo_conta?: string;
   numero_conta?: string;
   agencia?: string;
-  saldo_inicial?: number;
 }
 
 export interface CartaoCredito extends DimensaoBase {
@@ -69,32 +68,27 @@ export interface CartaoCredito extends DimensaoBase {
   user_id: string;
   id_banco: number;
   nome: string;
-  ultimos_digitos?: string;
-  bandeira?: string;
-  limite_credito?: number;
-  data_vencimento_fatura?: number;
+  numero?: string;
+  validade?: string;
+  limite?: number;
+  dia_vencimento?: number;
 }
 
 export interface Fornecedor extends DimensaoBase {
   id_fornecedor: number;
   user_id: string;
   nome: string;
-  tipo?: string;
-  cpf_cnpj?: string;
+  cnpj?: string;
   email?: string;
   telefone?: string;
-  endereco?: string;
 }
 
 export interface Cliente extends DimensaoBase {
   id_cliente: number;
   user_id: string;
   nome: string;
-  tipo?: string;
-  cpf_cnpj?: string;
   email?: string;
   telefone?: string;
-  endereco?: string;
 }
 
 // Interface para Lançamento (Tabela Fato)

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useForm } from 'react-hook-form';
 import { bancosService } from '../../services/bancosService';
 
@@ -37,7 +37,7 @@ export const FormularioBanco: React.FC<FormularioBancoProps> = ({ onSuccess, edi
           className="w-full px-3 py-2 border border-gray-300 rounded-md"
           placeholder="Nome do banco"
         />
-        {errors.nome && <span className="text-red-500 text-sm">{errors.nome.message}</span>}
+        {errors.nome && <span className="text-red-500 text-sm">{String(errors.nome.message)}</span>}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -78,17 +78,6 @@ export const FormularioBanco: React.FC<FormularioBancoProps> = ({ onSuccess, edi
             placeholder="1234"
           />
         </div>
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Saldo Inicial</label>
-        <input
-          type="number"
-          step="0.01"
-          {...register('saldo_inicial', { valueAsNumber: true })}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md"
-          placeholder="0.00"
-        />
       </div>
 
       <button

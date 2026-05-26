@@ -45,7 +45,6 @@ export const bancoSchema = z.object({
   tipo_conta: z.string().optional(),
   numero_conta: z.string().optional(),
   agencia: z.string().optional(),
-  saldo_inicial: z.number().default(0),
   ativo: z.boolean().default(true),
 });
 
