@@ -33,8 +33,11 @@ export const FormularioCategoria: React.FC<FormularioCategoriaProps> = ({ onSucc
 
   const onSubmit = async (data: any) => {
     try {
+      console.log('Dados do formulário:', data);
+      
       // Verifica se é edição (tem id_categoria_despesa) ou criação nova
       if (editData?.id_categoria_despesa) {
+        console.log('Atualizando categoria:', editData.id_categoria_despesa, data);
         await categoriasService.atualizar(editData.id_categoria_despesa, data);
         alert('Categoria atualizada com sucesso!');
       } else {
@@ -47,6 +50,7 @@ export const FormularioCategoria: React.FC<FormularioCategoriaProps> = ({ onSucc
           ...data,
           ativo: true,
         };
+        console.log('Criando categoria:', dadosParaCriar);
         await categoriasService.criar(dadosParaCriar);
         alert('Categoria criada com sucesso!');
         reset();
@@ -54,7 +58,7 @@ export const FormularioCategoria: React.FC<FormularioCategoriaProps> = ({ onSucc
       onSuccess?.();
     } catch (error) {
       console.error('Erro ao salvar categoria:', error);
-      alert('Erro ao salvar categoria');
+      alert('Erro ao salvar categoria: ' + (error as any).message);
     }
   };
 

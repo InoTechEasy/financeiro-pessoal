@@ -29,10 +29,10 @@ export const GerenciadorCartoes: React.FC = () => {
     setShowModal(true);
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: number) => {
     if (confirm('Tem certeza que deseja excluir?')) {
       await cartoesService.deletar(id);
-      setCartoes(cartoes.filter(c => c.id_cartao_credito !== id));
+      setCartoes(cartoes.filter(c => c.id_cartao !== id));
     }
   };
 
@@ -63,18 +63,18 @@ export const GerenciadorCartoes: React.FC = () => {
       </div>
       <div className="space-y-2">
         {cartoes.map((cartao) => (
-          <div key={cartao.id_cartao_credito} className="bg-gray-50 p-3 rounded-lg flex justify-between items-center">
+          <div key={cartao.id_cartao} className="bg-gray-50 p-3 rounded-lg flex justify-between items-center">
             <div>
               <div className="font-medium">{cartao.nome}</div>
               <div className="text-sm text-gray-500">
-                **** {cartao.ultimos_digitos} - {cartao.bandeira}
+                Número: {cartao.numero || '-'} - Vencimento: {cartao.dia_vencimento || '-'}
               </div>
-              <div className="text-sm text-gray-500">Limite: {formatCurrency(cartao.limite_credito || 0)}</div>
+              <div className="text-sm text-gray-500">Limite: {formatCurrency(cartao.limite || 0)}</div>
             </div>
             <div className="space-x-2">
               <button onClick={() => handleEdit(cartao)} className="text-blue-600 hover:text-blue-800">Editar</button>
               <button
-                onClick={() => handleDelete(cartao.id_cartao_credito)}
+                onClick={() => handleDelete(cartao.id_cartao)}
                 className="text-red-600 hover:text-red-800"
               >
                 Excluir

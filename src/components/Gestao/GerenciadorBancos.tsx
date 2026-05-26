@@ -15,9 +15,9 @@ export const GerenciadorBancos: React.FC = () => {
     setShowModal(true);
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: number) => {
     if (confirm('Tem certeza que deseja excluir?')) {
-      await deletar(id);
+      await deletar(String(id));
     }
   };
 
@@ -48,9 +48,9 @@ export const GerenciadorBancos: React.FC = () => {
             <div>
               <div className="font-medium">{banco.nome}</div>
               <div className="text-sm text-gray-500">
-                {banco.tipo_conta} - {banco.agencia} - {banco.numero_conta}
+                Agência: {banco.agencia || '-'} - Conta: {banco.conta || '-'}
               </div>
-              <div className="text-sm text-gray-500">Saldo: {formatCurrency(banco.saldo_inicial)}</div>
+              <div className="text-sm text-gray-500">Saldo: {formatCurrency(banco.saldo_atual || 0)}</div>
             </div>
             <div className="space-x-2">
               <button onClick={() => handleEdit(banco)} className="text-blue-600 hover:text-blue-800">Editar</button>
