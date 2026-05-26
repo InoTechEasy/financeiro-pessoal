@@ -38,6 +38,10 @@ export const FormularioCategoria: React.FC<FormularioCategoriaProps> = ({ onSucc
         await categoriasService.atualizar(editData.id_categoria_despesa, data);
         alert('Categoria atualizada com sucesso!');
       } else {
+        // Se id_pai for NaN (devido a string vazia com valueAsNumber), define como null
+        if (isNaN(data.id_pai)) {
+          data.id_pai = null;
+        }
         // Garante que ativo seja true ao criar nova categoria
         const dadosParaCriar = {
           ...data,
