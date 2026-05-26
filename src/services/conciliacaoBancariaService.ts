@@ -5,7 +5,7 @@ export const conciliacaoBancariaService = {
   async listar(filtros?: { id_banco?: number; data_inicio?: string; data_fim?: string }): Promise<any[]> {
     const userId = await getCurrentUserId();
     
-    let query = supabase.from('d_conciliacao_bancaria').select('*').eq('user_id', userId);
+    let query = supabase.from('f_conciliacao_bancaria').select('*').eq('user_id', userId);
 
     if (filtros?.id_banco) {
       query = query.eq('id_banco', filtros.id_banco);
@@ -28,7 +28,7 @@ export const conciliacaoBancariaService = {
     const userId = await getCurrentUserId();
     
     const { data, error } = await supabase
-      .from('d_conciliacao_bancaria')
+      .from('f_conciliacao_bancaria')
       .select('*')
       .eq('id_conciliacao', id)
       .eq('user_id', userId)
@@ -43,7 +43,7 @@ export const conciliacaoBancariaService = {
     const userId = await getCurrentUserId();
     
     const { data, error } = await supabase
-      .from('d_conciliacao_bancaria')
+      .from('f_conciliacao_bancaria')
       .insert([{ ...conciliacao, user_id: userId }])
       .select()
       .single();
@@ -55,7 +55,7 @@ export const conciliacaoBancariaService = {
   // Atualizar conciliação
   async atualizar(id: number, updates: Partial<any>): Promise<any> {
     const { data, error } = await supabase
-      .from('d_conciliacao_bancaria')
+      .from('f_conciliacao_bancaria')
       .update(updates)
       .eq('id_conciliacao', id)
       .select()
@@ -68,7 +68,7 @@ export const conciliacaoBancariaService = {
   // Deletar conciliação
   async deletar(id: number): Promise<void> {
     const { error } = await supabase
-      .from('d_conciliacao_bancaria')
+      .from('f_conciliacao_bancaria')
       .delete()
       .eq('id_conciliacao', id);
 
@@ -81,7 +81,7 @@ export const conciliacaoBancariaService = {
     
     // Buscar a última conciliação anterior à data início
     const { data, error } = await supabase
-      .from('d_conciliacao_bancaria')
+      .from('f_conciliacao_bancaria')
       .select('saldo_atual')
       .eq('user_id', userId)
       .eq('id_banco', idBanco)

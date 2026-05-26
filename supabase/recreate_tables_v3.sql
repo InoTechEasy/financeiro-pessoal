@@ -4,7 +4,7 @@
 
 -- Dropar todas as tabelas existentes
 DROP TABLE IF EXISTS f_lancamentos CASCADE;
-DROP TABLE IF EXISTS d_conciliacao_bancaria CASCADE;
+DROP TABLE IF EXISTS f_conciliacao_bancaria CASCADE;
 DROP TABLE IF EXISTS d_documentos CASCADE;
 DROP TABLE IF EXISTS d_cartoes_credito CASCADE;
 DROP TABLE IF EXISTS d_clientes CASCADE;
@@ -146,7 +146,7 @@ CREATE TABLE f_lancamentos (
 );
 
 -- Tabela de Conciliação Bancária (Dados transacionais - por usuário)
-CREATE TABLE d_conciliacao_bancaria (
+CREATE TABLE f_conciliacao_bancaria (
   id_conciliacao SERIAL PRIMARY KEY,
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   id_banco INTEGER NOT NULL REFERENCES d_bancos(id_banco),
@@ -180,7 +180,7 @@ ALTER TABLE d_cartoes_credito ENABLE ROW LEVEL SECURITY;
 ALTER TABLE d_clientes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE d_fornecedores ENABLE ROW LEVEL SECURITY;
 ALTER TABLE f_lancamentos ENABLE ROW LEVEL SECURITY;
-ALTER TABLE d_conciliacao_bancaria ENABLE ROW LEVEL SECURITY;
+ALTER TABLE f_conciliacao_bancaria ENABLE ROW LEVEL SECURITY;
 ALTER TABLE d_documentos ENABLE ROW LEVEL SECURITY;
 
 -- Políticas RLS para tabelas de dimensão (leitura: dados do sistema + dados do usuário)
@@ -320,16 +320,16 @@ CREATE POLICY "Users can update own data" ON f_lancamentos
 CREATE POLICY "Users can delete own data" ON f_lancamentos
   FOR DELETE USING (auth.uid() = user_id);
 
-CREATE POLICY "Users can read own data" ON d_conciliacao_bancaria
+CREATE POLICY "Users can read own data" ON f_conciliacao_bancaria
   FOR SELECT USING (auth.uid() = user_id);
 
-CREATE POLICY "Users can insert own data" ON d_conciliacao_bancaria
+CREATE POLICY "Users can insert own data" ON f_conciliacao_bancaria
   FOR INSERT WITH CHECK (auth.uid() = user_id);
 
-CREATE POLICY "Users can update own data" ON d_conciliacao_bancaria
+CREATE POLICY "Users can update own data" ON f_conciliacao_bancaria
   FOR UPDATE USING (auth.uid() = user_id);
 
-CREATE POLICY "Users can delete own data" ON d_conciliacao_bancaria
+CREATE POLICY "Users can delete own data" ON f_conciliacao_bancaria
   FOR DELETE USING (auth.uid() = user_id);
 
 CREATE POLICY "Users can read own data" ON d_documentos
@@ -352,7 +352,7 @@ CREATE INDEX idx_bancos_user_id ON d_bancos(user_id);
 CREATE INDEX idx_cartoes_user_id ON d_cartoes_credito(user_id);
 CREATE INDEX idx_clientes_user_id ON d_clientes(user_id);
 CREATE INDEX idx_fornecedores_user_id ON d_fornecedores(user_id);
-CREATE INDEX idx_conciliacao_user_id ON d_conciliacao_bancaria(user_id);
+CREATE INDEX idx_conciliacao_user_id ON f_conciliacao_bancaria(user_id);
 CREATE INDEX idx_documentos_user_id ON d_documentos(user_id);
 CREATE INDEX idx_tipos_lancamentos_user_id ON d_tipos_lancamentos(user_id);
 CREATE INDEX idx_tipos_pagamentos_user_id ON d_tipos_pagamentos(user_id);
