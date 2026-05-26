@@ -24,16 +24,23 @@ export interface TipoLancamentoDim extends DimensaoBase {
   descricao?: string;
 }
 
-export interface Receita extends DimensaoHierarquica {
+export interface Receita extends DimensaoBase {
   id_receita: number;
+  nome: string;
+  descricao?: string;
 }
 
-export interface Investimento extends DimensaoHierarquica {
+export interface Investimento extends DimensaoBase {
   id_investimento: number;
+  nome: string;
+  descricao?: string;
 }
 
-export interface CategoriaDespesa extends DimensaoHierarquica {
+export interface CategoriaDespesa extends DimensaoBase {
   id_categoria_despesa: number;
+  id_pai?: number | null;
+  nome: string;
+  descricao?: string;
 }
 
 export interface Documento {
