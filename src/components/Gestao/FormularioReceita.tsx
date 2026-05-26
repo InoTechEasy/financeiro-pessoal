@@ -19,12 +19,18 @@ export const FormularioReceita: React.FC<FormularioReceitaProps> = ({ onSuccess,
         await receitasService.atualizar(editData.id_receita, data);
         alert('Receita atualizada com sucesso!');
       } else {
-        await receitasService.criar(data);
+        // Garante que ativo seja true ao criar nova receita
+        const dadosParaCriar = {
+          ...data,
+          ativo: true,
+        };
+        await receitasService.criar(dadosParaCriar);
         alert('Receita criada com sucesso!');
         reset();
       }
       onSuccess?.();
     } catch (error) {
+      console.error('Erro ao salvar receita:', error);
       alert('Erro ao salvar receita');
     }
   };

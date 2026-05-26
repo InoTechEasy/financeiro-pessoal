@@ -38,12 +38,18 @@ export const FormularioCategoria: React.FC<FormularioCategoriaProps> = ({ onSucc
         await categoriasService.atualizar(editData.id_categoria_despesa, data);
         alert('Categoria atualizada com sucesso!');
       } else {
-        await categoriasService.criar(data);
+        // Garante que ativo seja true ao criar nova categoria
+        const dadosParaCriar = {
+          ...data,
+          ativo: true,
+        };
+        await categoriasService.criar(dadosParaCriar);
         alert('Categoria criada com sucesso!');
         reset();
       }
       onSuccess?.();
     } catch (error) {
+      console.error('Erro ao salvar categoria:', error);
       alert('Erro ao salvar categoria');
     }
   };
@@ -63,7 +69,7 @@ export const FormularioCategoria: React.FC<FormularioCategoriaProps> = ({ onSucc
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">Categoria Pai</label>
         <select
-          {...register('id_pai')}
+          {...register('id_pai', { valueAsNumber: true })}
           className="w-full px-3 py-2 border border-gray-300 rounded-md"
         >
           <option value="">Nenhuma (Categoria Principal)</option>

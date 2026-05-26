@@ -18,12 +18,18 @@ export const FormularioFornecedor: React.FC<FormularioFornecedorProps> = ({ onSu
         await fornecedoresService.atualizar(editData.id_fornecedor, data);
         alert('Fornecedor atualizado com sucesso!');
       } else {
-        await fornecedoresService.criar(data);
+        // Garante que ativo seja true ao criar novo fornecedor
+        const dadosParaCriar = {
+          ...data,
+          ativo: true,
+        };
+        await fornecedoresService.criar(dadosParaCriar);
         alert('Fornecedor criado com sucesso!');
         reset();
       }
       onSuccess?.();
     } catch (error) {
+      console.error('Erro ao salvar fornecedor:', error);
       alert('Erro ao salvar fornecedor');
     }
   };

@@ -18,12 +18,18 @@ export const FormularioCliente: React.FC<FormularioClienteProps> = ({ onSuccess,
         await clientesService.atualizar(editData.id_cliente, data);
         alert('Cliente atualizado com sucesso!');
       } else {
-        await clientesService.criar(data);
+        // Garante que ativo seja true ao criar novo cliente
+        const dadosParaCriar = {
+          ...data,
+          ativo: true,
+        };
+        await clientesService.criar(dadosParaCriar);
         alert('Cliente criado com sucesso!');
         reset();
       }
       onSuccess?.();
     } catch (error) {
+      console.error('Erro ao salvar cliente:', error);
       alert('Erro ao salvar cliente');
     }
   };

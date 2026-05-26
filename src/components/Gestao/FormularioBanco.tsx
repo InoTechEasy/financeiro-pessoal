@@ -18,12 +18,18 @@ export const FormularioBanco: React.FC<FormularioBancoProps> = ({ onSuccess, edi
         await bancosService.atualizar(editData.id_banco, data);
         alert('Banco atualizado com sucesso!');
       } else {
-        await bancosService.criar(data);
+        // Garante que ativo seja true ao criar novo banco
+        const dadosParaCriar = {
+          ...data,
+          ativo: true,
+        };
+        await bancosService.criar(dadosParaCriar);
         alert('Banco criado com sucesso!');
         reset();
       }
       onSuccess?.();
     } catch (error) {
+      console.error('Erro ao salvar banco:', error);
       alert('Erro ao salvar banco');
     }
   };

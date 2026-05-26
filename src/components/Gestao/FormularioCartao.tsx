@@ -36,12 +36,18 @@ export const FormularioCartao: React.FC<FormularioCartaoProps> = ({ onSuccess, e
         await cartoesService.atualizar(editData.id_cartao, data);
         alert('Cartão atualizado com sucesso!');
       } else {
-        await cartoesService.criar(data);
+        // Garante que ativo seja true ao criar novo cartão
+        const dadosParaCriar = {
+          ...data,
+          ativo: true,
+        };
+        await cartoesService.criar(dadosParaCriar);
         alert('Cartão criado com sucesso!');
         reset();
       }
       onSuccess?.();
     } catch (error) {
+      console.error('Erro ao salvar cartão:', error);
       alert('Erro ao salvar cartão');
     }
   };

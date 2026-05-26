@@ -19,12 +19,18 @@ export const FormularioInvestimento: React.FC<FormularioInvestimentoProps> = ({ 
         await investimentosService.atualizar(editData.id_investimento, data);
         alert('Investimento atualizado com sucesso!');
       } else {
-        await investimentosService.criar(data);
+        // Garante que ativo seja true ao criar novo investimento
+        const dadosParaCriar = {
+          ...data,
+          ativo: true,
+        };
+        await investimentosService.criar(dadosParaCriar);
         alert('Investimento criado com sucesso!');
         reset();
       }
       onSuccess?.();
     } catch (error) {
+      console.error('Erro ao salvar investimento:', error);
       alert('Erro ao salvar investimento');
     }
   };
