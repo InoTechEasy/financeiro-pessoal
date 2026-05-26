@@ -14,8 +14,11 @@ export const FormularioReceita: React.FC<FormularioReceitaProps> = ({ onSuccess,
 
   const onSubmit = async (data: any) => {
     try {
+      console.log('Dados do formulário:', data);
+      
       // Verifica se é edição (tem id_receita) ou criação nova
       if (editData?.id_receita) {
+        console.log('Atualizando receita:', editData.id_receita, data);
         await receitasService.atualizar(editData.id_receita, data);
         alert('Receita atualizada com sucesso!');
       } else {
@@ -24,6 +27,7 @@ export const FormularioReceita: React.FC<FormularioReceitaProps> = ({ onSuccess,
           ...data,
           ativo: true,
         };
+        console.log('Criando receita:', dadosParaCriar);
         await receitasService.criar(dadosParaCriar);
         alert('Receita criada com sucesso!');
         reset();
@@ -31,7 +35,7 @@ export const FormularioReceita: React.FC<FormularioReceitaProps> = ({ onSuccess,
       onSuccess?.();
     } catch (error) {
       console.error('Erro ao salvar receita:', error);
-      alert('Erro ao salvar receita');
+      alert('Erro ao salvar receita: ' + (error as any).message);
     }
   };
 

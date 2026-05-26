@@ -46,12 +46,6 @@ export const GerenciadorTiposLancamentos: React.FC = () => {
     <div>
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-semibold">Gerenciar Tipos de Lançamento</h3>
-        <button
-          onClick={() => { setEditData(null); setShowModal(true); }}
-          className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition"
-        >
-          + Novo Tipo
-        </button>
       </div>
       <div className="space-y-2">
         {tipos.map((tipo) => (
