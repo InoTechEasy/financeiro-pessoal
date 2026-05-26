@@ -7,7 +7,6 @@ import { formatCurrency } from '../utils/formatters';
 interface BancoComSaldo {
   id_banco: string;
   nome: string;
-  saldo_inicial: number;
   saldo_atual: number;
   receitas: number;
   despesas: number;
@@ -36,9 +35,9 @@ export const SaldosBancarios = () => {
       ]);
 
       // Encontrar IDs dos tipos de lançamento
-      const receitaId = tipos.find(t => t.nome === 'RECEITA' || t.nome === 'Receita')?.id_tipo_lancamento;
-      const despesaId = tipos.find(t => t.nome === 'DESPESA' || t.nome === 'Despesa')?.id_tipo_lancamento;
-      const transferenciaId = tipos.find(t => t.nome === 'TRANSFERENCIA' || t.nome === 'Transferência' || t.nome === 'Transferência entre contas')?.id_tipo_lancamento;
+      const receitaId = tipos.find(t => t.nome === 'Receita')?.id_tipo_lancamento;
+      const despesaId = tipos.find(t => t.nome === 'Despesa')?.id_tipo_lancamento;
+      const transferenciaId = tipos.find(t => t.nome === 'Transferência')?.id_tipo_lancamento;
 
       // Calcular saldo de cada banco
       const bancosComSaldoCalculado: BancoComSaldo[] = bancos.map((banco: any) => {
@@ -82,12 +81,11 @@ export const SaldosBancarios = () => {
           }
         });
 
-        const saldoAtual = banco.saldo_inicial + receitas - despesas + transferenciasRecebidas - transferenciasEnviadas;
+        const saldoAtual = (banco.saldo_atual || 0) + receitas - despesas + transferenciasRecebidas - transferenciasEnviadas;
 
         return {
           id_banco: banco.id_banco,
           nome: banco.nome,
-          saldo_inicial: banco.saldo_inicial,
           saldo_atual: saldoAtual,
           receitas,
           despesas,
@@ -149,11 +147,6 @@ export const SaldosBancarios = () => {
             <h3 className="text-lg font-semibold text-gray-800 mb-4">{banco.nome}</h3>
             
             <div className="space-y-3">
-              <div className="flex justify-between items-center">
-                <span className="text-gray-600">Saldo Inicial:</span>
-                <span className="font-medium">{formatCurrency(banco.saldo_inicial)}</span>
-              </div>
-              
               <div className="flex justify-between items-center">
                 <span className="text-gray-600">Receitas:</span>
                 <span className="font-medium text-green-600">+{formatCurrency(banco.receitas)}</span>

@@ -6,13 +6,11 @@ import { tiposLancamentosService } from '../services/tiposLancamentosService';
 import { formatCurrency, formatDate } from '../utils/formatters';
 
 interface CartaoComFatura {
-  id_cartao_credito: string;
+  id_cartao: string;
   nome: string;
-  ultimos_digitos: string;
-  limite_credito: number;
-  data_vencimento_fatura: number;
-  bandeira: string;
-  banco_nome: string;
+  numero: string;
+  limite: number;
+  dia_vencimento: number;
   faturasPorMes: { [key: string]: { valor: number; lancamentos: any[] } };
 }
 
@@ -21,7 +19,7 @@ export const CartoesCredito = () => {
   const [loading, setLoading] = useState(true);
   const [filtroData, setFiltroData] = useState<'vencimento' | 'pagamento'>('vencimento');
   const [editandoCartao, setEditandoCartao] = useState<any>(null);
-  const [formData, setFormData] = useState({ nome: '', limite_credito: 0, data_vencimento_fatura: 0 });
+  const [formData, setFormData] = useState({ nome: '', limite: 0, dia_vencimento: 0 });
   const [faturaSelecionada, setFaturaSelecionada] = useState<{ cartaoId: string; mes: string } | null>(null);
 
   useEffect(() => {
@@ -41,15 +39,13 @@ export const CartoesCredito = () => {
       ]);
 
       // Encontrar IDs dos tipos de lançamento
-      const despesaId = tipos.find(t => t.nome === 'DESPESA' || t.nome === 'Despesa')?.id_tipo_lancamento;
+      const despesaId = tipos.find(t => t.nome === 'Despesa')?.id_tipo_lancamento;
 
       // Calcular fatura de cada cartão
       const cartoesComFaturaCalculado: CartaoComFatura[] = cartoes.map((cartao: any) => {
-        const banco = bancos.find((b: any) => b.id_banco === cartao.id_banco);
-        
         // Filtrar lançamentos deste cartão (apenas despesas não pagas)
         const lancamentosDoCartao = lancamentos.filter((l: any) => 
-          l.id_cartao_credito === cartao.id_cartao_credito &&
+          l.id_cartao === cartao.id_cartao &&
           l.id_tipo_lancamento === despesaId &&
           !l.data_pagamento // Apenas não pagas
         );
@@ -71,18 +67,18 @@ export const CartoesCredito = () => {
             ? new Date(lancamento.data_vencimento)
             : new Date(lancamento.data_pagamento);
           
-          // Determinar o mês da fatura baseado no dia de vencimento da fatura do cartão
+          // Determinar o mês da fatura baseado no dia de vencimento do cartão
           // Se a data do lançamento for antes do dia de vencimento, pertence ao mês atual
           // Se for depois, pertence ao mês seguinte
           let dataFatura = new Date(dataLancamento);
           
-          if (dataLancamento.getDate() > cartao.data_vencimento_fatura) {
+          if (dataLancamento.getDate() > cartao.dia_vencimento) {
             // Lançamento após o dia de vencimento, vai para o mês seguinte
             dataFatura.setMonth(dataFatura.getMonth() + 1);
           }
           
-          // Ajustar para o dia de vencimento da fatura
-          dataFatura.setDate(cartao.data_vencimento_fatura);
+          // Ajustar para o dia de vencimento
+          dataFatura.setDate(cartao.dia_vencimento);
           
           const chaveMes = `${dataFatura.getFullYear()}-${String(dataFatura.getMonth() + 1).padStart(2, '0')}`;
           
@@ -98,13 +94,11 @@ export const CartoesCredito = () => {
         });
 
         return {
-          id_cartao_credito: cartao.id_cartao_credito,
+          id_cartao: cartao.id_cartao,
           nome: cartao.nome,
-          ultimos_digitos: cartao.ultimos_digitos,
-          limite_credito: cartao.limite_credito,
-          data_vencimento_fatura: cartao.data_vencimento_fatura,
-          bandeira: cartao.bandeira,
-          banco_nome: banco?.nome || '-',
+          numero: cartao.numero || '',
+          limite: cartao.limite || 0,
+          dia_vencimento: cartao.dia_vencimento || 0,
           faturasPorMes,
         };
       });
@@ -121,8 +115,8 @@ export const CartoesCredito = () => {
     setEditandoCartao(cartao);
     setFormData({
       nome: cartao.nome,
-      limite_credito: cartao.limite_credito,
-      data_vencimento_fatura: cartao.data_vencimento_fatura,
+      limite: cartao.limite,
+      dia_vencimento: cartao.dia_vencimento,
     });
   };
 
@@ -130,7 +124,7 @@ export const CartoesCredito = () => {
     try {
       if (!editandoCartao) return;
 
-      await cartoesService.atualizar(editandoCartao.id_cartao_credito, formData);
+      await cartoesService.atualizar(editandoCartao.id_cartao, formData);
       setEditandoCartao(null);
       carregarCartoes();
       alert('Cartão atualizado com sucesso!');
@@ -179,7 +173,7 @@ export const CartoesCredito = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {cartoesComFatura.map((cartao) => (
           <div
-            key={cartao.id_cartao_credito}
+            key={cartao.id_cartao}
             className="bg-white rounded-lg shadow-md p-6 border-l-4 border-purple-500"
           >
             <div className="flex justify-between items-start mb-2">
@@ -194,22 +188,17 @@ export const CartoesCredito = () => {
                 Editar
               </button>
             </div>
-            <p className="text-sm text-gray-600 mb-4">**** {cartao.ultimos_digitos}</p>
+            <p className="text-sm text-gray-600 mb-4">**** {cartao.numero?.slice(-4) || ''}</p>
             
             <div className="space-y-2">
               <div className="flex justify-between items-center">
-                <span className="text-gray-600 text-sm">Banco:</span>
-                <span className="font-medium text-sm">{cartao.banco_nome}</span>
-              </div>
-              
-              <div className="flex justify-between items-center">
-                <span className="text-gray-600 text-sm">Vencimento Fatura:</span>
-                <span className="font-medium text-sm">Dia {cartao.data_vencimento_fatura}</span>
+                <span className="text-gray-600 text-sm">Vencimento:</span>
+                <span className="font-medium text-sm">Dia {cartao.dia_vencimento}</span>
               </div>
               
               <div className="flex justify-between items-center">
                 <span className="text-gray-600 text-sm">Limite:</span>
-                <span className="font-medium text-sm">{formatCurrency(cartao.limite_credito)}</span>
+                <span className="font-medium text-sm">{formatCurrency(cartao.limite)}</span>
               </div>
               
               <div className="border-t pt-2 mt-2">
@@ -222,7 +211,7 @@ export const CartoesCredito = () => {
                 <div className="flex justify-between items-center mt-1">
                   <span className="text-gray-600 text-xs">Disponível:</span>
                   <span className="font-medium text-xs text-green-600">
-                    {formatCurrency(cartao.limite_credito - Object.values(cartao.faturasPorMes).reduce((acc, f) => acc + f.valor, 0))}
+                    {formatCurrency(cartao.limite - Object.values(cartao.faturasPorMes).reduce((acc, f) => acc + f.valor, 0))}
                   </span>
                 </div>
                 
@@ -240,7 +229,7 @@ export const CartoesCredito = () => {
                             key={mes}
                             onClick={(e) => {
                               e.stopPropagation();
-                              setFaturaSelecionada({ cartaoId: cartao.id_cartao_credito, mes });
+                              setFaturaSelecionada({ cartaoId: cartao.id_cartao, mes });
                             }}
                             className="w-full text-left px-3 py-2 bg-gray-50 hover:bg-gray-100 rounded text-sm flex justify-between items-center transition"
                           >
@@ -270,7 +259,7 @@ export const CartoesCredito = () => {
           </div>
           
           {(() => {
-            const cartao = cartoesComFatura.find(c => c.id_cartao_credito === faturaSelecionada.cartaoId);
+            const cartao = cartoesComFatura.find(c => c.id_cartao === faturaSelecionada.cartaoId);
             if (!cartao || !cartao.faturasPorMes[faturaSelecionada.mes]) return null;
             
             const fatura = cartao.faturasPorMes[faturaSelecionada.mes];
@@ -280,7 +269,7 @@ export const CartoesCredito = () => {
             return (
               <div className="bg-white rounded-lg shadow-md p-6">
                 <div className="mb-4">
-                  <h4 className="text-lg font-semibold">{cartao.nome} - **** {cartao.ultimos_digitos}</h4>
+                  <h4 className="text-lg font-semibold">{cartao.nome} - **** {cartao.numero?.slice(-4) || ''}</h4>
                   <p className="text-gray-600">Fatura de {nomeMes}: {formatCurrency(fatura.valor)}</p>
                 </div>
                 
@@ -357,20 +346,20 @@ export const CartoesCredito = () => {
                 <input
                   type="number"
                   step="0.01"
-                  value={formData.limite_credito}
-                  onChange={(e) => setFormData({ ...formData, limite_credito: parseFloat(e.target.value) })}
+                  value={formData.limite}
+                  onChange={(e) => setFormData({ ...formData, limite: parseFloat(e.target.value) })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md"
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Dia de Vencimento da Fatura</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Dia de Vencimento</label>
                 <input
                   type="number"
                   min="1"
                   max="31"
-                  value={formData.data_vencimento_fatura}
-                  onChange={(e) => setFormData({ ...formData, data_vencimento_fatura: parseInt(e.target.value) })}
+                  value={formData.dia_vencimento}
+                  onChange={(e) => setFormData({ ...formData, dia_vencimento: parseInt(e.target.value) })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md"
                 />
               </div>
