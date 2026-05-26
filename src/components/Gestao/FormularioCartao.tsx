@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useForm } from 'react-hook-form';
 import { cartoesService } from '../../services/cartoesService';
-import { bancosService } from '../../services/bancosService';
 
 interface FormularioCartaoProps {
   onSuccess?: () => void;
@@ -12,23 +11,6 @@ export const FormularioCartao: React.FC<FormularioCartaoProps> = ({ onSuccess, e
   const { register, handleSubmit, reset, formState: { errors } } = useForm({
     defaultValues: editData || {},
   });
-
-  const [bancos, setBancos] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const carregarBancos = async () => {
-      try {
-        const dados = await bancosService.listar();
-        setBancos(dados);
-      } catch (error) {
-        console.error('Erro ao carregar bancos:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    carregarBancos();
-  }, []);
 
   const onSubmit = async (data: any) => {
     try {
@@ -52,28 +34,8 @@ export const FormularioCartao: React.FC<FormularioCartaoProps> = ({ onSuccess, e
     }
   };
 
-  if (loading) {
-    return <div className="text-center py-8">Carregando...</div>;
-  }
-
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Banco *</label>
-        <select
-          {...register('id_banco', { required: 'Banco é obrigatório' })}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md"
-        >
-          <option value="">Selecione...</option>
-          {bancos.map((banco) => (
-            <option key={banco.id_banco} value={banco.id_banco}>
-              {banco.nome}
-            </option>
-          ))}
-        </select>
-        {errors.id_banco && <span className="text-red-500 text-sm">{String(errors.id_banco.message)}</span>}
-      </div>
-
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">Nome *</label>
         <input
@@ -117,16 +79,28 @@ export const FormularioCartao: React.FC<FormularioCartaoProps> = ({ onSuccess, e
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Dia de Vencimento</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Dia Fechamento</label>
           <input
             type="number"
-            {...register('dia_vencimento', { valueAsNumber: true })}
+            {...register('dia_fechamento', { valueAsNumber: true })}
             className="w-full px-3 py-2 border border-gray-300 rounded-md"
             placeholder="10"
             min={1}
             max={31}
           />
         </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Dia Vencimento</label>
+        <input
+          type="number"
+          {...register('dia_vencimento', { valueAsNumber: true })}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md"
+          placeholder="10"
+          min={1}
+          max={31}
+        />
       </div>
 
       <button

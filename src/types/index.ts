@@ -64,20 +64,19 @@ export interface Banco extends DimensaoBase {
   id_banco: number;
   user_id: string;
   nome: string;
-  codigo_banco?: string;
-  tipo_conta?: string;
-  numero_conta?: string;
   agencia?: string;
+  conta?: string;
+  saldo_atual?: number;
 }
 
 export interface CartaoCredito extends DimensaoBase {
   id_cartao: number;
   user_id: string;
-  id_banco: number;
   nome: string;
   numero?: string;
   validade?: string;
   limite?: number;
+  dia_fechamento?: number;
   dia_vencimento?: number;
 }
 

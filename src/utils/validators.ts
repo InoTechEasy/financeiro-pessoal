@@ -41,19 +41,18 @@ export const categoriaSchema = z.object({
 
 export const bancoSchema = z.object({
   nome: z.string().min(2, 'Nome deve ter no mínimo 2 caracteres'),
-  codigo_banco: z.string().optional(),
-  tipo_conta: z.string().optional(),
-  numero_conta: z.string().optional(),
   agencia: z.string().optional(),
+  conta: z.string().optional(),
+  saldo_atual: z.number().optional(),
   ativo: z.boolean().default(true),
 });
 
 export const cartaoSchema = z.object({
-  id_banco: z.number({ required_error: 'Banco é obrigatório' }),
   nome: z.string().min(2, 'Nome deve ter no mínimo 2 caracteres'),
   numero: z.string().optional(),
   validade: z.string().optional(),
   limite: z.number().positive().optional(),
+  dia_fechamento: z.number().int().min(1).max(31).optional(),
   dia_vencimento: z.number().int().min(1).max(31).optional(),
   ativo: z.boolean().default(true),
 });
