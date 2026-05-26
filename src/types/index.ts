@@ -20,24 +20,28 @@ export interface DimensaoHierarquica extends DimensaoBase {
 
 export interface TipoLancamentoDim extends DimensaoBase {
   id_tipo_lancamento: number;
+  user_id?: string | null;
   nome: TipoLancamento;
   descricao?: string;
 }
 
 export interface Receita extends DimensaoBase {
   id_receita: number;
+  user_id?: string | null;
   nome: string;
   descricao?: string;
 }
 
 export interface Investimento extends DimensaoBase {
   id_investimento: number;
+  user_id?: string | null;
   nome: string;
   descricao?: string;
 }
 
 export interface CategoriaDespesa extends DimensaoBase {
   id_categoria_despesa: number;
+  user_id?: string | null;
   id_pai?: number | null;
   nome: string;
   descricao?: string;
@@ -56,6 +60,7 @@ export interface Documento {
 
 export interface TipoPagamento extends DimensaoBase {
   id_tipo_pagamento: number;
+  user_id?: string | null;
   nome: string;
   descricao?: string;
 }
