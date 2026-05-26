@@ -179,7 +179,7 @@ export const FormularioLancamento: React.FC<FormularioLancamentoProps> = ({ onSu
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de Lançamento *</label>
           <select
-            {...register('id_tipo_lancamento')}
+            {...register('id_tipo_lancamento', { valueAsNumber: true })}
             className="w-full px-3 py-2 border border-gray-300 rounded-md"
           >
             <option value="">Selecione...</option>
@@ -239,7 +239,7 @@ export const FormularioLancamento: React.FC<FormularioLancamentoProps> = ({ onSu
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de Pagamento *</label>
           <select
-            {...register('id_tipo_pagamento')}
+            {...register('id_tipo_pagamento', { valueAsNumber: true })}
             className="w-full px-3 py-2 border border-gray-300 rounded-md"
           >
             <option value="">Selecione...</option>
@@ -255,7 +255,7 @@ export const FormularioLancamento: React.FC<FormularioLancamentoProps> = ({ onSu
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Banco *</label>
           <select
-            {...register('id_banco')}
+            {...register('id_banco', { valueAsNumber: true })}
             className="w-full px-3 py-2 border border-gray-300 rounded-md"
           >
             <option value="">Selecione...</option>
@@ -274,7 +274,7 @@ export const FormularioLancamento: React.FC<FormularioLancamentoProps> = ({ onSu
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Receita *</label>
             <select
-              {...register('id_receita')}
+              {...register('id_receita', { valueAsNumber: true })}
               className="w-full px-3 py-2 border border-gray-300 rounded-md"
             >
               <option value="">Selecione...</option>
@@ -290,7 +290,7 @@ export const FormularioLancamento: React.FC<FormularioLancamentoProps> = ({ onSu
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Cliente</label>
             <select
-              {...register('id_cliente')}
+              {...register('id_cliente', { valueAsNumber: true })}
               className="w-full px-3 py-2 border border-gray-300 rounded-md"
             >
               <option value="">Selecione...</option>
@@ -309,7 +309,7 @@ export const FormularioLancamento: React.FC<FormularioLancamentoProps> = ({ onSu
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Categoria de Despesa *</label>
             <select
-              {...register('id_categoria_despesa')}
+              {...register('id_categoria_despesa', { valueAsNumber: true })}
               className="w-full px-3 py-2 border border-gray-300 rounded-md"
             >
               <option value="">Selecione...</option>
@@ -330,7 +330,7 @@ export const FormularioLancamento: React.FC<FormularioLancamentoProps> = ({ onSu
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Fornecedor</label>
             <select
-              {...register('id_fornecedor')}
+              {...register('id_fornecedor', { valueAsNumber: true })}
               className="w-full px-3 py-2 border border-gray-300 rounded-md"
             >
               <option value="">Selecione...</option>
@@ -348,7 +348,7 @@ export const FormularioLancamento: React.FC<FormularioLancamentoProps> = ({ onSu
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Investimento *</label>
           <select
-            {...register('id_investimento')}
+            {...register('id_investimento', { valueAsNumber: true })}
             className="w-full px-3 py-2 border border-gray-300 rounded-md"
           >
             <option value="">Selecione...</option>
@@ -366,7 +366,7 @@ export const FormularioLancamento: React.FC<FormularioLancamentoProps> = ({ onSu
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Cartão de Crédito *</label>
           <select
-            {...register('id_cartao')}
+            {...register('id_cartao', { valueAsNumber: true })}
             className="w-full px-3 py-2 border border-gray-300 rounded-md"
           >
             <option value="">Selecione...</option>
